@@ -3,6 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { SignCreateSchema, SignToggleSchema } from "@/lib/schema";
+import { bangunUlangRuleset } from "@/lib/ruleset";
 
 export const runtime = "nodejs";
 
@@ -47,6 +48,7 @@ export async function PATCH(req: Request) {
   if (!(await requireAdmin(req))) return tolak();
   const parsed = SignToggleSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
+    await bangunUlangRuleset();
     return NextResponse.json({ error: "data tidak valid" }, { status: 400 });
   }
   await adminDb.collection("signs").doc(parsed.data.id).update({
