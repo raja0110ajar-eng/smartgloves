@@ -76,3 +76,15 @@ export const RuleSchema = z.object({
     .min(1)
     .max(7),
 });
+export const AiRequestSchema = z.object({
+  perintah: z.string().trim().min(2).max(500),
+});
+
+export const AiDraftSchema = z.object({
+  nama_isyarat: z.string().trim().min(1).max(50),
+  teks_output: z.string().trim().min(1).max(100),
+});
+
+export const AiResultSchema = z.object({
+  kata: z.array(AiDraftSchema).max(20),
+});

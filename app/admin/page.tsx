@@ -128,6 +128,7 @@ export default function AdminPage() {
         <button type="submit">Tambah kata</button>
       </form>
       <p><a href="/admin/rekam">Buka Mode Rekam →</a></p>
+      <p><a href="/admin/ai">Buka Asisten AI →</a></p>
 
       {pesan && <p>{pesan}</p>}
 
