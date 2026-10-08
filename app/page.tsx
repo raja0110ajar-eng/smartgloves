@@ -60,13 +60,6 @@ const terbaru = items[0]?.teks ?? "Menunggu gerakan...";
 
       {error && <p style={{ color: "#ff8080" }}>Error: {error}</p>}
 
-      <ul style={{ listStyle: "none", padding: 0, opacity: 0.6 }}>
-        {items.slice(1).map((it) => (
-          <li key={it.id} style={{ fontSize: "1.25rem" }}>
-            {it.teks}
-          </li>
-        ))}
-      </ul>
     </main>
   );
 }
