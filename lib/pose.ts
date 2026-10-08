@@ -7,6 +7,7 @@ export type StaticRule = {
   teks: string;
   durasi_tahan_ms: number;
   kondisi: Kondisi[];
+  audio_url?: string | null;
 };
 
 // Hitung batas min/max tiap sensor dari rekaman.

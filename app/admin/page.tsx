@@ -10,6 +10,7 @@ type Sign = {
   nama_isyarat: string;
   teks_output: string;
   aktif: boolean;
+  audio_url?: string;
 };
 
 export default function AdminPage() {
@@ -146,6 +147,9 @@ export default function AdminPage() {
               {s.nama_isyarat} → {s.teks_output}
             </span>
             <span style={{ display: "flex", gap: "0.5rem" }}>
+              {s.audio_url && (
+                <button onClick={() => new Audio(s.audio_url).play()}>Putar</button>
+              )}
               {s.aktif && <button onClick={() => simulasi(s)}>Simulasikan</button>}
               <button onClick={() => ubahAktif(s)}>
                 {s.aktif ? "Nonaktifkan" : "Aktifkan"}

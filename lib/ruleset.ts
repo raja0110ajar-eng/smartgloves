@@ -13,6 +13,7 @@ export async function ambilRuleAktif(): Promise<StaticRule[]> {
         teks: String(x.teks_output),
         durasi_tahan_ms: Number(x.durasi_tahan_ms ?? 400),
         kondisi: x.kondisi as Kondisi[],
+        audio_url: (x.audio_url as string | undefined) ?? null,
       },
     ];
   });

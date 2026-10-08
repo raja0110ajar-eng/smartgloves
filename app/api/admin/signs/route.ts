@@ -23,6 +23,7 @@ export async function GET(req: Request) {
       nama_isyarat: x.nama_isyarat,
       teks_output: x.teks_output,
       aktif: x.aktif,
+      audio_url: x.audio_url ?? "",
     };
   });
   return NextResponse.json({ signs });
