@@ -8,3 +8,16 @@ export const EventSchema = z.object({
 });
 
 export type EventInput = z.infer<typeof EventSchema>;
+export const SignCreateSchema = z.object({
+  nama_isyarat: z.string().trim().min(1).max(50),
+  teks_output: z.string().trim().min(1).max(100),
+});
+
+export const SignToggleSchema = z.object({
+  id: z.string().min(1),
+  aktif: z.boolean(),
+});
+
+export const SimulateSchema = z.object({
+  sign_id: z.string().min(1),
+});
