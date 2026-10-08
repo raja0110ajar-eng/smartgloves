@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { EventSchema } from "@/lib/schema";
+import { adminDb } from "@/lib/firebaseAdmin";
+
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  // 1. Cek "kunci" perangkat
   const auth = req.headers.get("authorization");
   if (auth !== `Bearer ${process.env.DEVICE_TOKEN}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  // 2. Baca data yang dikirim
   const body = await req.json().catch(() => null);
-
-  // 3. Periksa bentuk datanya
   const parsed = EventSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
@@ -20,6 +20,14 @@ export async function POST(req: Request) {
     );
   }
 
-  // 4. Kalau semua benar, balas OK
-  return NextResponse.json({ ok: true, received: parsed.data });
+  const { sign_id, teks, device_id } = parsed.data;
+
+  await adminDb.collection("events").add({
+    sign_id,
+    teks,
+    device_id,
+    waktu: FieldValue.serverTimestamp(),
+  });
+
+  return NextResponse.json({ ok: true });
 }
