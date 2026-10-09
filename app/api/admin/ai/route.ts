@@ -3,6 +3,7 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { tanyaJson } from "@/lib/gemini";
 import { AiRequestSchema, AiResultSchema } from "@/lib/schema";
+import { buatSlug } from "@/lib/slug";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -46,11 +47,11 @@ export async function POST(req: Request) {
 
   // Buang kata yang sudah ada atau kembar
   const snap = await adminDb.collection("signs").select("teks_output").limit(500).get();
-  const ada = new Set(snap.docs.map((d) => String(d.data().teks_output).toLowerCase()));
+  const ada = new Set(snap.docs.map((d) => buatSlug(String(d.data().teks_output ?? ""))));
   const kata: { nama_isyarat: string; teks_output: string }[] = [];
   const dilewati: string[] = [];
   for (const k of hasil.data.kata) {
-    const kunci = k.teks_output.toLowerCase();
+    const kunci = buatSlug(k.teks_output);
     if (ada.has(kunci)) {
       dilewati.push(k.teks_output);
     } else {

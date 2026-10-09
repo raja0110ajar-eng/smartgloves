@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAdmin } from "@/lib/useAdmin";
 
 type Draf = { nama_isyarat: string; teks_output: string; pilih: boolean };
@@ -11,8 +11,11 @@ export default function AiPage() {
   const [draf, setDraf] = useState<Draf[]>([]);
   const [pesan, setPesan] = useState("");
   const [sibuk, setSibuk] = useState(false);
+  const kunci = useRef(false);
 
   async function buatDraf() {
+    if (kunci.current) return;
+    kunci.current = true;
     setSibuk(true);
     setPesan("");
     try {
@@ -33,6 +36,7 @@ export default function AiPage() {
     } catch (e) {
       setPesan((e as Error).message);
     } finally {
+      kunci.current = false;
       setSibuk(false);
     }
   }
@@ -42,8 +46,12 @@ export default function AiPage() {
   }
 
   async function simpan() {
+    if (kunci.current) return;
+    kunci.current = true;
+    setSibuk(true);
     const sisa: Draf[] = [];
     let ok = 0;
+    let sudahAda = 0;
     for (const k of draf) {
       if (!k.pilih) {
         sisa.push(k);
@@ -55,27 +63,44 @@ export default function AiPage() {
           teks_output: k.teks_output,
         });
         ok++;
-      } catch {
-        sisa.push(k);
+      } catch (e) {
+        if ((e as Error).message.includes("sudah ada")) sudahAda++;
+        else sisa.push(k);
       }
     }
     setDraf(sisa);
-    setPesan(`${ok} kata disimpan.${sisa.length ? " Sisanya belum tersimpan." : ""}`);
+    setPesan(
+      `${ok} kata disimpan` +
+        (sudahAda ? `, ${sudahAda} dilewati karena sudah ada` : "") +
+        "." +
+        (sisa.some((x) => x.pilih) ? " Sebagian gagal, coba lagi." : "")
+    );
+    kunci.current = false;
+    setSibuk(false);
   }
 
   if (!ready) return <p style={{ padding: "2rem" }}>Memuat...</p>;
   if (!isAdmin) return <p style={{ padding: "2rem" }}>Akun ini bukan admin.</p>;
 
   return (
-    <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui", padding: "0 1rem" }}>
-      <p><a href="/admin">← Kembali</a></p>
+    <main
+      style={{
+        maxWidth: 640,
+        margin: "2rem auto",
+        fontFamily: "system-ui",
+        padding: "0 1rem",
+      }}
+    >
+      <p>
+        <a href="/admin">← Kembali</a>
+      </p>
       <h1>Asisten AI</h1>
       <p>Tulis kata apa yang mau didaftarkan, boleh banyak sekaligus.</p>
 
       <textarea
         rows={3}
         style={{ width: "100%" }}
-        placeholder='Contoh: daftarkan kata halo, terima kasih, tolong, maaf'
+        placeholder="Contoh: daftarkan kata halo, terima kasih, tolong, maaf"
         value={perintah}
         onChange={(e) => setPerintah(e.target.value)}
       />
@@ -108,7 +133,9 @@ export default function AiPage() {
               </li>
             ))}
           </ul>
-          <button onClick={simpan}>Simpan yang dicentang</button>
+          <button onClick={simpan} disabled={sibuk}>
+            {sibuk ? "Menyimpan..." : "Simpan yang dicentang"}
+          </button>
         </>
       )}
     </main>

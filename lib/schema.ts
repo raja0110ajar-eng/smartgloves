@@ -88,3 +88,16 @@ export const AiDraftSchema = z.object({
 export const AiResultSchema = z.object({
   kata: z.array(AiDraftSchema).max(20),
 });
+export const SignUpdateSchema = z.object({
+  id: z.string().min(1),
+  nama_isyarat: z.string().trim().min(1).max(50),
+  teks_output: z.string().trim().min(1).max(100),
+});
+
+export const SignDeleteSchema = z.object({
+  id: z.string().min(1),
+});
+
+export const CleanSchema = z.object({
+  simulasi: z.boolean(),
+});
