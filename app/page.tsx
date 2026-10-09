@@ -1,65 +1,61 @@
-"use client";
+import Link from "next/link";
 
-import { useEffect, useState } from "react";
-import {
-  collection,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-} from "firebase/firestore";
-import { db } from "@/lib/firebaseClient";
-
-type Item = { id: string; teks: string };
-
-export default function Home() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const q = query(
-      collection(db, "events"),
-      orderBy("waktu", "desc"),
-      limit(10)
-    );
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        setItems(
-          snap.docs.map((d) => ({
-            id: d.id,
-            teks: String(d.data().teks ?? ""),
-          }))
-        );
-      },
-      (err) => setError(err.message)
-    );
-    return () => unsub();
-  }, []);
-
-const terbaru = items[0]?.teks ?? "Menunggu gerakan...";
-
+export default function Beranda() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#0b0b0f",
-        color: "#ffffff",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "2rem",
-        padding: "2rem",
-        fontFamily: "system-ui, sans-serif",
-      }}
-    >
-      <h1 style={{ fontSize: "clamp(3rem, 12vw, 8rem)", margin: 0 }}>
-        {terbaru}
-      </h1>
+    <main>
+      <section className="hero">
+        <h1>SmartGloves</h1>
+        <p>
+          Sarung tangan pintar yang menerjemahkan isyarat tangan SIBI menjadi
+          teks dan suara secara langsung.
+        </p>
+        <div className="aksi">
+          <Link href="/live" className="tombol utama">
+            Lihat Demo Live
+          </Link>
+          <Link href="/kamus" className="tombol">
+            Kamus Isyarat
+          </Link>
+        </div>
+      </section>
 
-      {error && <p style={{ color: "#ff8080" }}>Error: {error}</p>}
+      <section className="kontainer bagian">
+        <h2>Cara kerjanya</h2>
+        <div className="grid3">
+          <div className="kartu">
+            <h3>1. Membaca isyarat</h3>
+            <p>
+              Sensor tekuk di setiap jari dan sensor gerak di punggung tangan
+              membaca bentuk jari serta arah tangan.
+            </p>
+          </div>
+          <div className="kartu">
+            <h3>2. Mengenali kata</h3>
+            <p>
+              Mikrokontroler ESP32 mencocokkan pose dengan kamus isyarat yang
+              tersimpan di dalam sarung tangan.
+            </p>
+          </div>
+          <div className="kartu">
+            <h3>3. Teks dan suara</h3>
+            <p>
+              Kata yang dikenali tampil sebagai teks di layar web dan
+              diucapkan lewat speaker kecil pada sarung tangan.
+            </p>
+          </div>
+        </div>
+      </section>
 
+      <section className="kontainer bagian">
+        <div className="kartu">
+          <h3>Cakupan prototipe</h3>
+          <p>
+            Proyek ini memakai isyarat SIBI (Sistem Isyarat Bahasa Indonesia)
+            dengan satu tangan, dan fokus pada huruf serta kata dasar. SmartGloves
+            adalah prototipe edukasi, bukan pengganti juru bahasa isyarat.
+          </p>
+        </div>
+      </section>
     </main>
   );
 }

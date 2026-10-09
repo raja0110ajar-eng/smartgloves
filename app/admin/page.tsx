@@ -150,6 +150,7 @@ export default function AdminPage() {
       <p style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         <a href="/admin/rekam">Mode Rekam →</a>
         <a href="/admin/ai">Asisten AI →</a>
+        <a href="/admin/halaman">Halaman →</a>
       </p>
 
       <form onSubmit={tambah} style={{ display: "grid", gap: "0.5rem", margin: "1rem 0" }}>

@@ -101,3 +101,77 @@ export const SignDeleteSchema = z.object({
 export const CleanSchema = z.object({
   simulasi: z.boolean(),
 });
+const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const DIPAKAI_SISTEM = ["admin", "login", "api", "kamus", "live"];
+
+export const HalamanSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .min(2, "Alamat minimal 2 karakter.")
+    .max(60, "Alamat maksimal 60 karakter.")
+    .regex(SLUG_RE, "Alamat hanya boleh huruf kecil, angka, dan tanda minus.")
+    .refine((s) => !DIPAKAI_SISTEM.includes(s), "Alamat ini dipakai sistem, pilih yang lain."),
+  judul: z
+    .string()
+    .trim()
+    .min(1, "Judul wajib diisi.")
+    .max(80, "Judul maksimal 80 karakter."),
+  isi: z.string().max(20000, "Isi terlalu panjang."),
+  urutan: z.number().int().min(0).max(999),
+  tampil: z.boolean(),
+});
+
+export const HalamanHapusSchema = z.object({
+  slug: z.string().min(1),
+});
+export const AiPerintahSchema = z.object({
+  perintah: z.string().trim().min(2).max(4000),
+});
+
+export const AksiSchema = z.discriminatedUnion("tipe", [
+  z.object({
+    tipe: z.literal("kata_tambah"),
+    nama_isyarat: z.string().trim().min(1).max(50),
+    teks_output: z.string().trim().min(1).max(100),
+  }),
+  z.object({
+    tipe: z.literal("kata_ubah"),
+    id: z.string().min(1),
+    nama_isyarat: z.string().trim().min(1).max(50),
+    teks_output: z.string().trim().min(1).max(100),
+  }),
+  z.object({
+    tipe: z.literal("kata_aktif"),
+    id: z.string().min(1),
+    aktif: z.boolean(),
+  }),
+  z.object({
+    tipe: z.literal("kata_hapus"),
+    id: z.string().min(1),
+  }),
+  z.object({
+    tipe: z.literal("halaman_tulis"),
+    slug: HalamanSchema.shape.slug,
+    judul: HalamanSchema.shape.judul,
+    isi: HalamanSchema.shape.isi,
+    urutan: z.number().int().min(0).max(999).nullish(),
+    tampil: z.boolean().nullish(),
+  }),
+  z.object({
+    tipe: z.literal("halaman_tampil"),
+    slug: HalamanSchema.shape.slug,
+    tampil: z.boolean(),
+  }),
+  z.object({
+    tipe: z.literal("halaman_hapus"),
+    slug: HalamanSchema.shape.slug,
+  }),
+]);
+
+export type Aksi = z.infer<typeof AksiSchema>;
+
+export const TerapkanSchema = z.object({
+  perintah: z.string().max(4000).optional(),
+  aksi: z.array(AksiSchema).min(1).max(20),
+});
