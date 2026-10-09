@@ -50,3 +50,15 @@ export function cariTumpangTindih(baru: Kondisi[], rules: StaticRule[]) {
     })
   );
 }
+// Skor kecocokan 0-100: seberapa dekat bacaan sensor ke TENGAH rentang tiap kondisi rule.
+// 100 = tepat di tengah, 50 = tepat di tepi rentang. Ini ukuran kedekatan, BUKAN probabilitas.
+// Fungsi yang sama nanti diterjemahkan ke C++ untuk ESP32.
+export function hitungSkor(sample: Sample, rule: StaticRule): number {
+  const nilai = rule.kondisi.map((c) => {
+    const tengah = (c.min + c.max) / 2;
+    const setengah = Math.max((c.max - c.min) / 2, 1);
+    const jarak = Math.min(Math.abs(sample[c.sensor] - tengah) / setengah, 1);
+    return 1 - 0.5 * jarak;
+  });
+  return Math.round((nilai.reduce((a, b) => a + b, 0) / nilai.length) * 100);
+}

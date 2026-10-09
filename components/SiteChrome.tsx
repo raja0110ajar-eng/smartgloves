@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import TemaToggle from "./TemaToggle";
 
 type Item = { href: string; label: string };
 

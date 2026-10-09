@@ -34,7 +34,9 @@ await mkdir(tmp, { recursive: true });
 
 // 1. Cari kata aktif yang belum punya audio
 const snap = await db.collection("signs").where("aktif", "==", true).get();
-const daftar = snap.docs.filter((d) => semua || !d.data().audio_url);
+const daftar = snap.docs.filter((d) =>
+  semua ? d.data().audio_sumber !== "unggahan" : !d.data().audio_url
+);
 console.log(`${daftar.length} kata perlu dibuatkan audio.`);
 
 let berhasil = 0;
@@ -63,6 +65,7 @@ for (const d of daftar) {
     // 5. Simpan alamatnya (?v= supaya ESP32 tahu kalau filenya berganti)
     await d.ref.update({
       audio_url: `${data.publicUrl}?v=${Date.now()}`,
+      audio_sumber: "mesin",
       diubah: FieldValue.serverTimestamp(),
     });
     console.log(`OK     ${x.teks_output} (${(buf.length / 1024).toFixed(1)} KB)`);

@@ -1,4 +1,6 @@
 import { adminDb } from "@/lib/firebaseAdmin";
+import { KATEGORI, type Kategori } from "@/lib/kategori";
+import KamusKlien, { type KataKamus } from "@/components/KamusKlien";
 
 export const revalidate = 300;
 export const metadata = { title: "Kamus isyarat, SmartGloves" };
@@ -7,22 +9,24 @@ export const metadata = { title: "Kamus isyarat, SmartGloves" };
 // false = semua kata aktif
 const HANYA_YANG_PUNYA_RULE = true;
 
-type Kata = { id: string; nama: string; teks: string; siap: boolean };
-
-async function ambilKata(): Promise<Kata[]> {
+async function ambilKata(): Promise<KataKamus[]> {
   try {
     const snap = await adminDb.collection("signs").where("aktif", "==", true).get();
     return snap.docs
       .map((d) => {
         const x = d.data();
+        const kat = String(x.kategori ?? "kata");
         return {
           id: d.id,
           nama: String(x.nama_isyarat ?? ""),
           teks: String(x.teks_output ?? ""),
+          kategori: (KATEGORI as readonly string[]).includes(kat) ? (kat as Kategori) : "kata",
+          audio_url: String(x.audio_url ?? ""),
           siap: Array.isArray(x.kondisi) && x.kondisi.length > 0,
         };
       })
       .filter((k) => !HANYA_YANG_PUNYA_RULE || k.siap)
+      .map(({ siap: _siap, ...k }) => k)
       .sort((a, b) => a.nama.localeCompare(b.nama, "id"));
   } catch {
     return [];
@@ -44,14 +48,7 @@ export default async function KamusPage() {
           <p>Belum ada kata yang terdaftar.</p>
         </div>
       ) : (
-        <div className="grid3">
-          {kata.map((k) => (
-            <div key={k.id} className="kartu">
-              <h3>{k.nama}</h3>
-              <p>{k.teks}</p>
-            </div>
-          ))}
-        </div>
+        <KamusKlien kata={kata} />
       )}
     </main>
   );

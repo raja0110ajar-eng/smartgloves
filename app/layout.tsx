@@ -14,7 +14,14 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const menu = await ambilMenu();
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("tema");if(t==="terang"||t==="gelap")document.documentElement.dataset.tema=t}catch(e){}`,
+          }}
+        />
+      </head>
       <body>
         <SiteChrome menuHalaman={menu}>{children}</SiteChrome>
       </body>

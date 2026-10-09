@@ -44,6 +44,7 @@ export async function terapkanAksi(a: Aksi): Promise<HasilAksi> {
         await signs.doc(slug).create({
           nama_isyarat: a.nama_isyarat,
           teks_output: a.teks_output,
+          kategori: a.kategori ?? "kata",
           aktif: true,
           versi: 1,
           dibuat: FieldValue.serverTimestamp(),

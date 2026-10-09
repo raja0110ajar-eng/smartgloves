@@ -20,13 +20,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const { sign_id, teks, device_id } = parsed.data;
+  const { sign_id, teks, device_id, skor } = parsed.data;
 
   await adminDb.collection("events").add({
     sign_id,
     teks,
     device_id,
     waktu: FieldValue.serverTimestamp(),
+    ...(skor !== undefined ? { skor: Math.round(skor) } : {}),
   });
 
   return NextResponse.json({ ok: true });

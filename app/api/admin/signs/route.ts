@@ -40,6 +40,7 @@ export async function GET(req: Request) {
       nama_isyarat: x.nama_isyarat,
       teks_output: x.teks_output,
       aktif: x.aktif === true,
+      kategori: x.kategori ?? "kata",
       audio_url: x.audio_url ?? "",
       punya_rule: Array.isArray(x.kondisi) && x.kondisi.length > 0,
     };
@@ -63,6 +64,7 @@ export async function POST(req: Request) {
     await adminDb.collection("signs").doc(slug).create({
       ...parsed.data,
       aktif: true,
+      kategori: parsed.data.kategori ?? "kata",
       versi: 1,
       dibuat: FieldValue.serverTimestamp(),
       diubah: FieldValue.serverTimestamp(),
@@ -78,7 +80,7 @@ export async function PUT(req: Request) {
   if (!(await requireAdmin(req))) return tolak();
   const parsed = SignUpdateSchema.safeParse(await bacaBody(req));
   if (!parsed.success) return salah("Data tidak valid.");
-  const { id, nama_isyarat, teks_output } = parsed.data;
+  const { id, nama_isyarat, teks_output, kategori } = parsed.data;
 
   const ref = adminDb.collection("signs").doc(id);
   const doc = await ref.get();
@@ -95,6 +97,7 @@ export async function PUT(req: Request) {
   await ref.update({
     nama_isyarat,
     teks_output,
+    ...(kategori ? { kategori } : {}),
     // teks berubah = audio lama tidak cocok lagi, hapus supaya dibuat ulang
     ...(teksBerubah ? { audio_url: FieldValue.delete() } : {}),
     diubah: FieldValue.serverTimestamp(),

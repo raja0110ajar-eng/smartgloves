@@ -22,6 +22,7 @@ export async function POST(req: Request) {
     sign_id: doc.id,
     teks: doc.data()?.teks_output,
     device_id: "simulator",
+    skor: Math.round(80 + Math.random() * 19),
     waktu: FieldValue.serverTimestamp(),
   });
   return NextResponse.json({ ok: true });

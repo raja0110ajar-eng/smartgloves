@@ -5,17 +5,19 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebaseClient";
 import { useAdmin } from "@/lib/useAdmin";
+import { KATEGORI, LABEL_KATEGORI, type Kategori } from "@/lib/kategori";
 
 type Sign = {
   id: string;
   nama_isyarat: string;
   teks_output: string;
+  kategori: string;
   aktif: boolean;
   audio_url: string;
   punya_rule: boolean;
 };
 
-type Edit = { id: string; nama: string; teks: string };
+type Edit = { id: string; nama: string; teks: string; kategori: string };
 
 export default function AdminPage() {
   const router = useRouter();
@@ -23,6 +25,7 @@ export default function AdminPage() {
   const [signs, setSigns] = useState<Sign[]>([]);
   const [nama, setNama] = useState("");
   const [teks, setTeks] = useState("");
+  const [kategori, setKategori] = useState<Kategori>("kata");
   const [edit, setEdit] = useState<Edit | null>(null);
   const [pesan, setPesan] = useState("");
   const [sibuk, setSibuk] = useState(false);
@@ -60,6 +63,7 @@ export default function AdminPage() {
       await api("/api/admin/signs", "POST", {
         nama_isyarat: nama,
         teks_output: teks,
+        kategori,
       });
       setNama("");
       setTeks("");
@@ -74,10 +78,11 @@ export default function AdminPage() {
         id: edit.id,
         nama_isyarat: edit.nama,
         teks_output: edit.teks,
+        kategori: edit.kategori,
       });
       setEdit(null);
       return d.perlu_audio
-        ? "Tersimpan. Teks berubah, jalankan skrip audio untuk membuat suara barunya."
+        ? "Tersimpan. Teks berubah, buat audio barunya (skrip audio atau halaman Audio)."
         : "Tersimpan.";
     });
   }
@@ -122,7 +127,7 @@ export default function AdminPage() {
   if (!ready) return <p style={{ padding: "2rem" }}>Memuat...</p>;
   if (!isAdmin) {
     return (
-      <main style={{ padding: "2rem", fontFamily: "system-ui" }}>
+      <main style={{ padding: "2rem" }}>
         <p>Akun ini bukan admin.</p>
         <button onClick={() => signOut(auth).then(() => router.replace("/login"))}>
           Keluar
@@ -132,14 +137,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main
-      style={{
-        maxWidth: 680,
-        margin: "2rem auto",
-        fontFamily: "system-ui",
-        padding: "0 1rem",
-      }}
-    >
+    <main style={{ maxWidth: 680, margin: "2rem auto", padding: "0 1rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1>Admin SmartGloves</h1>
         <button onClick={() => signOut(auth).then(() => router.replace("/login"))}>
@@ -151,6 +149,7 @@ export default function AdminPage() {
         <a href="/admin/rekam">Mode Rekam →</a>
         <a href="/admin/ai">Asisten AI →</a>
         <a href="/admin/halaman">Halaman →</a>
+        <a href="/admin/audio">Audio →</a>
       </p>
 
       <form onSubmit={tambah} style={{ display: "grid", gap: "0.5rem", margin: "1rem 0" }}>
@@ -166,6 +165,13 @@ export default function AdminPage() {
           onChange={(e) => setTeks(e.target.value)}
           required
         />
+        <select value={kategori} onChange={(e) => setKategori(e.target.value as Kategori)}>
+          {KATEGORI.map((k) => (
+            <option key={k} value={k}>
+              Kategori: {LABEL_KATEGORI[k]}
+            </option>
+          ))}
+        </select>
         <button type="submit" disabled={sibuk}>
           {sibuk ? "Memproses..." : "Tambah kata"}
         </button>
@@ -173,7 +179,7 @@ export default function AdminPage() {
 
       {pesan && <p>{pesan}</p>}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
         <h2>Daftar kata ({signs.length})</h2>
         <button onClick={bersihkan} disabled={sibuk}>
           Bersihkan duplikat
@@ -185,7 +191,7 @@ export default function AdminPage() {
           <li
             key={s.id}
             style={{
-              border: "1px solid #555",
+              border: "1px solid var(--garis)",
               borderRadius: 8,
               padding: "0.75rem",
               opacity: s.aktif ? 1 : 0.55,
@@ -201,6 +207,16 @@ export default function AdminPage() {
                   value={edit.teks}
                   onChange={(e) => setEdit({ ...edit, teks: e.target.value })}
                 />
+                <select
+                  value={edit.kategori}
+                  onChange={(e) => setEdit({ ...edit, kategori: e.target.value })}
+                >
+                  {KATEGORI.map((k) => (
+                    <option key={k} value={k}>
+                      Kategori: {LABEL_KATEGORI[k]}
+                    </option>
+                  ))}
+                </select>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <button onClick={simpanEdit} disabled={sibuk}>
                     Simpan
@@ -216,7 +232,7 @@ export default function AdminPage() {
                   <strong>{s.nama_isyarat}</strong> → {s.teks_output}
                 </div>
                 <div style={{ fontSize: "0.85rem", opacity: 0.7 }}>
-                  {s.aktif ? "aktif" : "nonaktif"} ·{" "}
+                  {s.kategori} · {s.aktif ? "aktif" : "nonaktif"} ·{" "}
                   {s.punya_rule ? "ada rule" : "belum ada rule"} ·{" "}
                   {s.audio_url ? "ada audio" : "belum ada audio"}
                 </div>
@@ -231,7 +247,12 @@ export default function AdminPage() {
                   )}
                   <button
                     onClick={() =>
-                      setEdit({ id: s.id, nama: s.nama_isyarat, teks: s.teks_output })
+                      setEdit({
+                        id: s.id,
+                        nama: s.nama_isyarat,
+                        teks: s.teks_output,
+                        kategori: s.kategori,
+                      })
                     }
                     disabled={sibuk}
                   >

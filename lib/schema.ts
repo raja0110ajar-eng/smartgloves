@@ -1,16 +1,19 @@
 import { z } from "zod";
+import { KATEGORI } from "./kategori";
 
 export const EventSchema = z.object({
   sign_id: z.string().min(1).max(50),
   teks: z.string().min(1).max(100),
   device_id: z.string().min(1).max(50),
   timestamp: z.number().int().optional(),
+  skor: z.number().min(0).max(100).optional(),
 });
 
 export type EventInput = z.infer<typeof EventSchema>;
 export const SignCreateSchema = z.object({
   nama_isyarat: z.string().trim().min(1).max(50),
   teks_output: z.string().trim().min(1).max(100),
+  kategori: z.enum(KATEGORI).optional(),
 });
 
 export const SignToggleSchema = z.object({
@@ -92,6 +95,7 @@ export const SignUpdateSchema = z.object({
   id: z.string().min(1),
   nama_isyarat: z.string().trim().min(1).max(50),
   teks_output: z.string().trim().min(1).max(100),
+  kategori: z.enum(KATEGORI).optional(),
 });
 
 export const SignDeleteSchema = z.object({
@@ -134,6 +138,7 @@ export const AksiSchema = z.discriminatedUnion("tipe", [
     tipe: z.literal("kata_tambah"),
     nama_isyarat: z.string().trim().min(1).max(50),
     teks_output: z.string().trim().min(1).max(100),
+    kategori: z.enum(KATEGORI).nullish().catch(null),
   }),
   z.object({
     tipe: z.literal("kata_ubah"),
