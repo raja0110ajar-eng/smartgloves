@@ -23,6 +23,7 @@ export default function SiteChrome({
     { href: "/", label: "Beranda" },
     ...menuHalaman,
     { href: "/kamus", label: "Kamus" },
+    { href: "/latihan", label: "Latihan" },
     { href: "/live", label: "Demo Live" },
   ];
 
@@ -43,6 +44,7 @@ export default function SiteChrome({
                 {m.label}
               </Link>
             ))}
+            <TemaToggle />
           </nav>
         </div>
       </header>

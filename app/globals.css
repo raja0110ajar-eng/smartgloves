@@ -216,3 +216,54 @@ img, video { max-width: 100%; }
   button, .tombol { min-height: 44px; }
   input, textarea, select { font-size: 16px; }
 }
+/* Latihan */
+.latih {
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+  text-align: center;
+  padding: 1rem 0 2rem;
+}
+.latih-bar {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.latih .skor-bar { width: min(24rem, 90%); }
+.latih-target {
+  font-size: clamp(3rem, 14vw, 7rem);
+  margin: 0;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.slots { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+.slot {
+  min-width: 2.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  background: var(--panel);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.umpan {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--garis);
+  background: var(--panel);
+  max-width: 34rem;
+}
+.umpan.benar { border-color: #3fa66b; }
+.umpan.salah { border-color: #c75050; }
+.panel-uji {
+  border: 1px dashed var(--garis);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 2rem;
+  text-align: center;
+}
+.bintang { color: #e0b030; letter-spacing: 0.1em; }
