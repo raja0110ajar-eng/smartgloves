@@ -1,10 +1,67 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0b0b0f"/>
-  <g fill="#7c9cff">
-    <rect x="16" y="14" width="8" height="26" rx="4"/>
-    <rect x="26" y="10" width="8" height="30" rx="4"/>
-    <rect x="36" y="12" width="8" height="28" rx="4"/>
-    <rect x="46" y="18" width="8" height="22" rx="4"/>
-    <rect x="14" y="34" width="40" height="20" rx="10"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <!-- Latar Belakang Putih Bersih -->
+  <rect width="800" height="800" fill="#ffffff"/>
+  
+  <g transform="translate(0, 20)">
+    <!-- BAGIAN ATAS: Bintang dan Api (Warna Jingga/Terracotta #C15C3D) -->
+    <path d="M 400,140 
+             L 446,260 
+             L 576,276 
+             L 480,364 
+             L 506,492 
+             L 400,426 
+             L 400,380 
+             C 415,385 435,360 435,330 
+             C 435,280 395,285 395,230 
+             C 395,285 355,280 355,330 
+             C 355,360 375,385 390,380 
+             L 390,426 
+             L 294,492 
+             L 320,364 
+             L 224,276 
+             L 354,260 
+             Z" 
+          fill="#C15C3D" 
+          stroke="#ffffff" 
+          stroke-width="8" 
+          stroke-linejoin="round"/>
+    
+    <!-- Lidah Api Bagian Dalam (Detail Negatif/Putih) -->
+    <path d="M 400,250 
+             C 415,290 425,320 405,350 
+             C 395,365 385,350 380,340 
+             C 370,320 385,290 400,250 Z" 
+          fill="#ffffff"/>
+
+    <!-- BAGIAN BAWAH: Kerah/Pegangan Geometris (Warna Biru Tua #16365C) -->
+    <!-- Sayap Kiri -->
+    <path d="M 370,410 
+             L 285,460 
+             L 280,550 
+             L 330,580 
+             L 390,750 
+             L 390,660 
+             L 325,535 
+             L 370,510 
+             Z" 
+          fill="#16365C" 
+          stroke="#ffffff" 
+          stroke-width="6" 
+          stroke-linejoin="round"/>
+          
+    <!-- Sayap Kanan -->
+    <path d="M 430,410 
+             L 515,460 
+             L 520,550 
+             L 470,580 
+             L 410,750 
+             L 410,660 
+             L 475,535 
+             L 430,510 
+             Z" 
+          fill="#16365C" 
+          stroke="#ffffff" 
+          stroke-width="6" 
+          stroke-linejoin="round"/>
   </g>
 </svg>
