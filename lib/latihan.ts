@@ -17,6 +17,8 @@ export const DETIK_TIME_ATTACK = 60;
 export const DETIK_PER_KATA_EJA = 30;
 export const KATA_PER_RONDE_EJA = 5;
 const SKOR_DEFAULT = 70;
+// Pose yang dikenali tapi kecocokannya di bawah ini tidak dihitung benar
+export const SKOR_MINIMUM = 60;
 const UKURAN_LEVEL = 5;
 
 // Kata sederhana untuk mode Eja. Hanya yang semua hurufnya tersedia yang dipakai.
@@ -109,7 +111,7 @@ export type Progres = {
   eja: number;
 };
 
-const KUNCI = "smartgloves-latihan-v1";
+const KUNCI = "smartgloves-latihan-v2";
 
 export const progresKosong = (): Progres => ({ level: {}, timeAttack: 0, eja: 0 });
 
@@ -268,6 +270,16 @@ function prosesEja(s: Game, e: EventMasuk, sekarang: number): Game {
   const target = s.antreanEja[s.pos];
   if (!target) return s;
 
+    if (e.skor !== null && e.skor < SKOR_MINIMUM) {
+    return {
+      ...s,
+      umpan: {
+        jenis: "salah",
+        teks: `Huruf "${huruf}" kurang rapi (kecocokan ${e.skor}%, minimal ${SKOR_MINIMUM}%). Ulangi hurufnya.`,
+      },
+    };
+  }
+
   const terkumpul = s.terkumpul + huruf;
   if (terkumpul.length >= target.length) {
     return selesaikanEja({ ...s, terkumpul }, sekarang);
@@ -303,6 +315,15 @@ export function reduksi(s: Game, a: Aksi): Game {
 
       if (a.e.sign_id === target.id) {
         const skor = a.e.skor ?? SKOR_DEFAULT;
+        if (skor < SKOR_MINIMUM) {
+          return {
+            ...s,
+            umpan: {
+              jenis: "salah",
+              teks: `"${target.teks}" dikenali tapi kurang rapi (kecocokan ${skor}%, minimal ${SKOR_MINIMUM}%). Coba lagi.`,
+            },
+          };
+        }
         const detik = Math.max(0, (a.sekarang - s.mulaiMs) / 1000);
         const bonus = Math.max(0, 50 - Math.round(detik * 5));
         const poin = skor + bonus;
@@ -357,4 +378,15 @@ export function reduksi(s: Game, a: Aksi): Game {
       return { ...s, terkumpul: s.terkumpul.slice(0, -1) };
     }
   }
+}
+// Kunci tetap untuk satu level, dari ID isyarat di dalamnya.
+// Kalau isi level berubah, progres level itu dimulai dari awal (materinya memang berbeda).
+export function kunciLevel(level: Kata[]) {
+  const s = level
+    .map((k) => k.id)
+    .sort()
+    .join("|");
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return `L${(h >>> 0).toString(36)}`;
 }

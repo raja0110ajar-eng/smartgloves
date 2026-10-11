@@ -20,6 +20,7 @@ import {
   hitungBintang,
   kataEjaTersedia,
   kocok,
+  kunciLevel,
   namaLevel,
   progresKosong,
   reduksi,
@@ -118,7 +119,7 @@ export default function LatihanKlien({ kata }: { kata: Kata[] }) {
     const p = bacaProgres();
     if (g.mode === "level") {
       const bintang = hitungBintang(g.benar, g.antrean.length);
-      const kunci = String(g.levelIdx);
+      const kunci = kunciLevel(g.antrean);
       const lama = p.level[kunci];
       p.level[kunci] = {
         bintang: Math.max(lama?.bintang ?? 0, bintang),
@@ -166,7 +167,7 @@ export default function LatihanKlien({ kata }: { kata: Kata[] }) {
   }
 
   const terbuka = (i: number) =>
-    i === 0 || (progres.level[String(i - 1)]?.bintang ?? 0) >= 1;
+   i === 0 || (progres.level[kunciLevel(level[i - 1])]?.bintang ?? 0) >= 1;
 
   /* ---------- Panel uji (hanya admin) ---------- */
 
@@ -247,7 +248,7 @@ export default function LatihanKlien({ kata }: { kata: Kata[] }) {
         <h2>Level</h2>
         <div className="grid3">
           {level.map((l, i) => {
-            const b = progres.level[String(i)]?.bintang ?? 0;
+            const b = progres.level[kunciLevel(l)]?.bintang ?? 0;
             const buka = terbuka(i);
             return (
               <div key={i} className="kartu">

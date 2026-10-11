@@ -348,3 +348,86 @@ img, video { max-width: 100%; }
     scroll-behavior: auto !important;
   }
 }
+/* Status Demo Live */
+.status-bar {
+  width: min(40rem, 100%);
+  display: grid;
+  gap: 0.4rem;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+.status-baris { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+.status-info { margin: 0; color: var(--redup); font-size: 0.9rem; }
+.status-galat {
+  width: min(40rem, 100%);
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid #c75050;
+  border-radius: 10px;
+  background: var(--panel);
+  text-align: left;
+}
+.titik {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+  border: 2px solid var(--garis);
+}
+.titik.online { background: #3fa66b; border-color: #3fa66b; }
+.titik.putus { background: #c75050; border-color: #c75050; }
+.titik.belum { background: transparent; }
+.live-isi { display: grid; gap: 0.5rem; justify-items: center; width: 100%; }
+/* Menu Tampilan */
+.tampilan { position: relative; }
+.tampilan summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--redup);
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+}
+.tampilan summary::-webkit-details-marker { display: none; }
+.tampilan[open] summary { color: var(--teks); }
+.tampilan-isi {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 20;
+  background: var(--panel);
+  border: 1px solid var(--garis);
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.6rem;
+  min-width: 15rem;
+}
+.tampilan-baris { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+/* Kontras tinggi (harus di bawah blok tema terang) */
+:root[data-kontras="tinggi"] {
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --garis: #9a9a9a;
+  --teks: #ffffff;
+  --redup: #e0e0e0;
+  --aksen: #ffd54a;
+  --nav-bg: #000000;
+  --di-aksen: #000000;
+}
+:root[data-tema="terang"][data-kontras="tinggi"] {
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --garis: #3a3a3a;
+  --teks: #000000;
+  --redup: #1a1a1a;
+  --aksen: #0b3dc9;
+  --nav-bg: #ffffff;
+  --di-aksen: #ffffff;
+}
+:root[data-kontras="tinggi"] a { text-decoration: underline; }

@@ -9,7 +9,7 @@ export const metadata = { title: "Latihan isyarat, SmartGloves" };
 // SEMENTARA false: selama belum ada sarung tangan, semua kata aktif bisa dilatih
 // lewat panel uji. Ubah ke true kalau perangkat sudah dipakai, supaya hanya
 // isyarat yang benar-benar punya rule yang muncul.
-const HANYA_YANG_PUNYA_RULE = false;
+const HANYA_YANG_PUNYA_RULE = process.env.LATIHAN_SEMUA_KATA !== "true";
 
 async function ambilKata(): Promise<Kata[]> {
   try {

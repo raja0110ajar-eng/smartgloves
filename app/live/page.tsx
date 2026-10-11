@@ -9,6 +9,7 @@ import {
   query,
 } from "firebase/firestore";
 import { db } from "@/lib/firebaseClient";
+import { kondisiPerangkat, teksDurasi } from "@/lib/statusBantu";
 
 type Item = {
   id: string;
@@ -18,19 +19,24 @@ type Item = {
   simulasi: boolean;
 };
 
+type StatusState = {
+  siap: boolean;
+  gagal: boolean;
+  detik: number | null;
+  diterima: number;
+  batas: boolean;
+};
+
 // Kata yang datang berdekatan (selisih kurang dari ini) digabung jadi satu kalimat
 const JEDA_KALIMAT_MS = 4000;
 
-function kapan(ms: number, sekarang: number) {
-  const s = Math.max(0, Math.round((sekarang - ms) / 1000));
-  if (s < 10) return "baru saja";
-  if (s < 60) return `${s} detik lalu`;
-  const m = Math.round(s / 60);
-  if (m < 60) return `${m} menit lalu`;
-  const j = Math.round(m / 60);
-  if (j < 24) return `${j} jam lalu`;
-  return `${Math.round(j / 24)} hari lalu`;
-}
+const PESAN_DATA: Record<string, string> = {
+  "permission-denied":
+    "Akses ke data langsung ditolak. Hubungi admin untuk memeriksa pengaturan keamanan.",
+  unavailable: "Koneksi ke data langsung terputus. Periksa internet lalu coba lagi.",
+};
+
+const jam = (ms: number) => new Date(ms).toLocaleTimeString("id-ID");
 
 // items: terbaru lebih dulu. Hasil: kalimat terbaru lebih dulu.
 function bentukKalimat(items: Item[]) {
@@ -61,12 +67,21 @@ function cariSuaraIndonesia() {
 export default function LivePage() {
   const [items, setItems] = useState<Item[]>([]);
   const [disembunyi, setDisembunyi] = useState<Set<string>>(new Set());
-  const [error, setError] = useState<string | null>(null);
+  const [galatData, setGalatData] = useState<string | null>(null);
+  const [ulang, setUlang] = useState(0);
   const [sekarang, setSekarang] = useState(() => Date.now());
   const [suara, setSuara] = useState(false);
   const [mendukungSuara, setMendukungSuara] = useState(true);
   const [adaSuaraId, setAdaSuaraId] = useState(true);
   const [pesan, setPesan] = useState("");
+  const [online, setOnline] = useState(true);
+  const [status, setStatus] = useState<StatusState>({
+    siap: false,
+    gagal: false,
+    detik: null,
+    diterima: 0,
+    batas: false,
+  });
 
   const ref = useRef<HTMLElement>(null);
   const suaraRef = useRef(false);
@@ -85,7 +100,7 @@ export default function LivePage() {
     window.speechSynthesis.speak(u);
   }
 
-  // Cek dukungan suara dan ketersediaan suara Indonesia di perangkat ini
+  // Dukungan suara dan ketersediaan suara Indonesia di perangkat ini
   useEffect(() => {
     if (!("speechSynthesis" in window)) {
       setMendukungSuara(false);
@@ -97,8 +112,23 @@ export default function LivePage() {
     return () => window.speechSynthesis.removeEventListener("voiceschanged", cek);
   }, []);
 
-  // Dengarkan event baru dari Firestore
+  // Status koneksi browser pengunjung
   useEffect(() => {
+    const naik = () => setOnline(true);
+    const turun = () => setOnline(false);
+    setOnline(navigator.onLine);
+    window.addEventListener("online", naik);
+    window.addEventListener("offline", turun);
+    return () => {
+      window.removeEventListener("online", naik);
+      window.removeEventListener("offline", turun);
+    };
+  }, []);
+
+  // Dengarkan event baru dari Firestore. Berganti "ulang" memasang pendengar baru.
+  useEffect(() => {
+    pertama.current = true;
+    setGalatData(null);
     const q = query(collection(db, "events"), orderBy("waktu", "desc"), limit(30));
     const unsub = onSnapshot(
       q,
@@ -117,7 +147,6 @@ export default function LivePage() {
             .sort((a, b) => a.ms - b.ms)
             .forEach((x) => ucapkan(x.teks));
         }
-
         setItems(
           snap.docs.map((d) => {
             const x = d.data();
@@ -131,14 +160,52 @@ export default function LivePage() {
           })
         );
       },
-      (err) => setError(err.message)
+      (err) => {
+        const kode = (err as { code?: string }).code ?? "";
+        setGalatData(PESAN_DATA[kode] ?? "Tidak bisa memuat data langsung. Coba muat ulang halaman.");
+      }
     );
     return () => unsub();
+  }, [ulang]);
+
+  // Status perangkat dari server, dicek tiap 20 detik (dijeda saat tab tidak terlihat)
+  useEffect(() => {
+    let batal = false;
+    async function muatStatus() {
+      if (document.visibilityState === "hidden") return;
+      try {
+        const res = await fetch("/api/status", { cache: "no-store" });
+        if (!res.ok) throw new Error("gagal");
+        const d = await res.json();
+        if (!batal) {
+          setStatus({
+            siap: true,
+            gagal: false,
+            detik: typeof d.detikLalu === "number" ? d.detikLalu : null,
+            diterima: Date.now(),
+            batas: d.batasTercapai === true,
+          });
+        }
+      } catch {
+        if (!batal) setStatus((s) => ({ ...s, gagal: true }));
+      }
+    }
+    muatStatus();
+    const t = setInterval(muatStatus, 20_000);
+    const lihat = () => {
+      if (document.visibilityState === "visible") muatStatus();
+    };
+    document.addEventListener("visibilitychange", lihat);
+    return () => {
+      batal = true;
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", lihat);
+    };
   }, []);
 
-  // Perbarui keterangan "x menit lalu" tiap 15 detik
+  // Perbarui keterangan waktu tiap 5 detik
   useEffect(() => {
-    const t = setInterval(() => setSekarang(Date.now()), 15000);
+    const t = setInterval(() => setSekarang(Date.now()), 5000);
     return () => clearInterval(t);
   }, []);
 
@@ -148,6 +215,12 @@ export default function LivePage() {
   );
   const kalimat = useMemo(() => bentukKalimat(tampil), [tampil]);
   const terbaru = tampil[0];
+
+  const detikPerangkat =
+    status.detik === null
+      ? null
+      : status.detik + Math.round((sekarang - status.diterima) / 1000);
+  const kondisi = status.siap ? kondisiPerangkat(detikPerangkat) : null;
 
   function ubahSuara() {
     if (!suara) {
@@ -193,6 +266,65 @@ export default function LivePage() {
         <button onClick={layarPenuh}>Layar penuh</button>
       </div>
 
+      <section className="status-bar" aria-label="Status koneksi">
+        <div className="status-baris">
+          <span className={`titik ${kondisi ?? "belum"}`} aria-hidden="true" />
+          <strong>
+            {kondisi === null
+              ? "Memeriksa perangkat..."
+              : kondisi === "online"
+                ? "Perangkat online"
+                : kondisi === "putus"
+                  ? "Perangkat tidak terlihat"
+                  : "Perangkat belum pernah terhubung"}
+          </strong>
+          {kondisi === "online" && detikPerangkat !== null && (
+            <span>terlihat {teksDurasi(detikPerangkat)}</span>
+          )}
+          {kondisi === "putus" && detikPerangkat !== null && (
+            <span>sejak {teksDurasi(detikPerangkat)}</span>
+          )}
+        </div>
+        <div className="status-baris">
+          <span>
+            Data terakhir:{" "}
+            {terbaru
+              ? `diterima pukul ${jam(terbaru.ms)} (${teksDurasi((sekarang - terbaru.ms) / 1000)})`
+              : "belum ada"}
+          </span>
+        </div>
+        {kondisi === "putus" && (
+          <p className="status-info">
+            Periksa daya dan koneksi WiFi sarung tangan. Teks baru tidak akan muncul sampai
+            perangkat terhubung lagi.
+          </p>
+        )}
+        {status.gagal && (
+          <p className="status-info">Status perangkat tidak dapat diperiksa saat ini.</p>
+        )}
+        <p className="status-info">
+          &quot;Online&quot; berarti perangkat terhubung ke server, bukan berarti sedang dipakai.
+        </p>
+      </section>
+
+      {!online && (
+        <p role="alert" className="status-galat">
+          Perangkatmu sedang offline, jadi teks baru tidak bisa diterima. Periksa koneksi internet.
+        </p>
+      )}
+      {status.batas && (
+        <p role="alert" className="status-galat">
+          Batas pengiriman data harian tercapai. Teks baru dari sarung tangan tidak akan muncul
+          sampai besok.
+        </p>
+      )}
+      {galatData && (
+        <p role="alert" className="status-galat">
+          {galatData}{" "}
+          <button onClick={() => setUlang((u) => u + 1)}>Coba lagi</button>
+        </p>
+      )}
+
       {!mendukungSuara && (
         <p className="catatan">Browser ini tidak mendukung suara otomatis.</p>
       )}
@@ -203,35 +335,35 @@ export default function LivePage() {
         </p>
       )}
 
-      {terbaru ? (
-        <>
-          <h1 className="live-teks">{terbaru.teks}</h1>
-          <p className="live-info">{kapan(terbaru.ms, sekarang)}</p>
-          {terbaru.skor !== null && (
-            <div className="skor">
-              <span>
-                Kecocokan pose: {terbaru.skor}%{terbaru.simulasi ? " (simulasi)" : ""}
-              </span>
-              <div className="skor-bar">
-                <div style={{ width: `${terbaru.skor}%` }} />
+      <div className="live-isi" aria-live="polite" aria-atomic="true">
+        {terbaru ? (
+          <>
+            <p className="catatan">Hasil deteksi terakhir:</p>
+            <h1 className="live-teks">{terbaru.teks}</h1>
+            {terbaru.skor !== null && (
+              <div className="skor">
+                <span>
+                  Kecocokan pose: {terbaru.skor}%{terbaru.simulasi ? " (simulasi)" : ""}
+                </span>
+                <div className="skor-bar">
+                  <div style={{ width: `${terbaru.skor}%` }} />
+                </div>
+                <p className="catatan">
+                  Skor menunjukkan seberapa dekat bacaan sensor dengan pose yang direkam,
+                  bukan peluang bahwa tebakan benar.
+                </p>
               </div>
-              <p className="catatan">
-                Skor menunjukkan seberapa dekat bacaan sensor dengan pose yang direkam,
-                bukan peluang bahwa tebakan benar.
-              </p>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <h1 className="live-teks">Menunggu gerakan...</h1>
-          <p className="live-info">
-            Teks akan muncul di sini saat sarung tangan bergerak.
-          </p>
-        </>
-      )}
-
-      {error && <p style={{ color: "#ff8080" }}>Error: {error}</p>}
+            )}
+          </>
+        ) : (
+          <>
+            <h1 className="live-teks">Menunggu gerakan...</h1>
+            <p className="live-info">
+              Teks akan muncul di sini saat sarung tangan mendeteksi isyarat.
+            </p>
+          </>
+        )}
+      </div>
 
       {kalimat.length > 0 && (
         <section className="kalimat-wadah">

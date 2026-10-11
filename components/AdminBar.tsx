@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseClient";
-import TemaToggle from "./TemaToggle";
+import TampilanMenu from "./TampilanMenu";
 
 // Keluar otomatis kalau tidak ada aktivitas selama ini
 const BATAS_IDLE_MENIT = 30;
@@ -14,6 +14,7 @@ const MENU = [
   { href: "/admin/ringkasan", label: "Ringkasan" },
   { href: "/admin", label: "Kata" },
   { href: "/admin/rekam", label: "Rekam" },
+  { href: "/admin/perangkat", label: "Perangkat" },
   { href: "/admin/audio", label: "Audio" },
   { href: "/admin/halaman", label: "Halaman" },
   { href: "/admin/ai", label: "AI" },
@@ -21,7 +22,6 @@ const MENU = [
   { href: "/admin/cadangan", label: "Cadangan" },
   { href: "/admin/log", label: "Aktivitas" },
 ];
-
 export default function AdminBar() {
   const path = usePathname();
   const router = useRouter();
@@ -85,7 +85,7 @@ export default function AdminBar() {
           ))}
         </nav>
         <div className="adminbar-kanan">
-          <TemaToggle />
+          <TampilanMenu />
           <button onClick={keluar}>Keluar</button>
         </div>
       </div>

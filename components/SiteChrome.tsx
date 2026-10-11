@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import TemaToggle from "./TemaToggle";
+import TampilanMenu from "./TampilanMenu";
 
 type Item = { href: string; label: string };
 
@@ -48,7 +48,7 @@ export default function SiteChrome({
                 {m.label}
               </Link>
             ))}
-            <TemaToggle />
+            <TampilanMenu />
           </nav>
         </div>
       </header>
@@ -63,7 +63,10 @@ export default function SiteChrome({
           style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}
         >
           <span>SmartGloves, prototipe penerjemah SIBI.</span>
-          <Link href="/login">Admin</Link>
+            <span style={{ display: "flex", gap: "1rem" }}>
+            <Link href="/privasi">Privasi</Link>
+            <Link href="/login">Admin</Link>
+          </span>
         </div>
       </footer>
     </>

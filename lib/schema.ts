@@ -106,7 +106,7 @@ export const CleanSchema = z.object({
   simulasi: z.boolean(),
 });
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const DIPAKAI_SISTEM = ["admin", "login", "api", "kamus", "live", "latihan", "tanya"];
+const DIPAKAI_SISTEM = ["admin", "login", "api", "kamus", "live", "latihan", "tanya", "privasi"];
 
 export const HalamanSchema = z.object({
   slug: z

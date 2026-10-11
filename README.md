@@ -42,6 +42,22 @@ harian, dan situs menyediakan penjaga kuota untuk event dan asisten AI.
 - Web: berjalan
 - Firmware ESP32: belum ada
 
+## Dokumentasi teknis
+- Kontrak API untuk firmware: `docs/KONTRAK_FIRMWARE.md`
+
+## Daftar periksa sebelum presentasi
+- Buka situs 5 menit sebelumnya supaya server tidak dingin, lalu cek `/api/health`
+- Admin > Ringkasan: bagian "Perlu perhatian" kosong
+- Admin > Perangkat: sarung tangan online. Hapus catatan "simulator"
+- Buka dashboard Supabase supaya proyek aktif
+- Sisa kuota event dan AI hari ini masih cukup (Ringkasan)
+- Ruleset di perangkat sudah versi terbaru, audio terunduh
+- Siapkan hotspot ponsel sebagai cadangan WiFi, dan pastikan suara lokal tetap berbunyi
+- Siapkan video rekaman demo sebagai cadangan
+- Unduh cadangan data (Admin > Cadangan)
+- Token dan kunci tidak terlihat di layar atau slide
+- Buka `/live` dalam layar penuh dan cek volume
+
 ## Tim
 1. Azizah
 2. Fatin 
