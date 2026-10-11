@@ -112,7 +112,7 @@ export async function tanyaJson(
   const rincian: Rincian[] = [];
   let adaSiap = false;
 
-  for (const p of urutan()) {
+  for (const p of opsi.urutan ?? urutan()) {
     const d = DAFTAR[p];
     if (!d.siap()) continue;
     adaSiap = true;
