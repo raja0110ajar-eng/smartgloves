@@ -52,10 +52,11 @@ export default function AiPage() {
         d.usulan.map((u: Omit<Usulan, "pilih">) => ({ ...u, pilih: !u.bahaya }))
       );
       const catatan = d.dilewati.length ? ` Dilewati: ${d.dilewati.join("; ")}.` : "";
+      const oleh = d.penyedia ? ` (dijawab oleh ${d.penyedia})` : "";
       setPesan(
         d.usulan.length
-          ? `Periksa usulan di bawah, lalu terapkan.${catatan}`
-          : `AI tidak menemukan aksi yang bisa dilakukan.${catatan}`
+          ? `Periksa usulan di bawah, lalu terapkan.${oleh}${catatan}`
+          : `AI tidak menemukan aksi yang bisa dilakukan.${oleh}${catatan}`
       );
     });
   }
@@ -103,6 +104,9 @@ export default function AiPage() {
         <a href="/admin">← Kembali</a>
       </p>
       <h1>Asisten AI</h1>
+      <p>
+        <a href="/admin/ai/status">Status penyedia AI →</a>
+      </p>
       <p style={{ color: "var(--redup)" }}>
         Tulis apa yang mau dilakukan. AI hanya membuat <strong>usulan</strong>, tidak ada yang
         berubah sebelum kamu klik Terapkan. Contoh: &quot;daftarkan kata maaf dan tolong&quot;,

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireAdmin } from "@/lib/requireAdmin";
-import { tanyaJson } from "@/lib/gemini";
+import { AiGagal, tanyaJson } from "@/lib/ai";
 import { buatSlug } from "@/lib/slug";
 import { AiPerintahSchema, AksiSchema, type Aksi } from "@/lib/schema";
 
@@ -93,29 +93,32 @@ export async function POST(req: Request) {
     });
   }
 
-  // 2. Tanya AI
+    // 2. Tanya AI (Gemini dulu, OpenRouter sebagai cadangan)
   let jawaban: unknown;
+  let penyedia = "";
   try {
     const data = JSON.stringify({
       kata: [...kata.values()],
       halaman: [...halaman.values()],
     });
-    jawaban = await tanyaJson(
+    const h = await tanyaJson(
       INSTRUKSI,
-      `<DATA>\n${data}\n</DATA>\n\nPermintaan admin:\n${parsed.data.perintah}`
+      `<DATA>\n${data}\n</DATA>\n\nPermintaan admin:\n${parsed.data.perintah}`,
+      { valid: (x) => Array.isArray((x as { aksi?: unknown } | null)?.aksi) }
     );
+    jawaban = h.data;
+    penyedia = h.penyedia;
   } catch (e) {
-    const status = (e as { status?: number }).status;
-    if (status === 429) {
-      return NextResponse.json(
-        { error: "Kuota AI sedang habis. Coba lagi sebentar, atau lakukan perubahan secara manual." },
-        { status: 429 }
-      );
+    if (e instanceof AiGagal) {
+      const pesan =
+        e.kode === "kuota"
+          ? "Kuota semua penyedia AI sedang habis. Coba lagi sebentar, atau lakukan perubahan secara manual."
+          : e.kode === "tidak-ada-penyedia"
+            ? "Belum ada penyedia AI yang dikonfigurasi. Buka halaman Status AI."
+            : "Semua penyedia AI gagal menjawab. Buka halaman Status AI untuk memeriksa.";
+      return NextResponse.json({ error: pesan }, { status: e.kode === "kuota" ? 429 : 502 });
     }
-    return NextResponse.json(
-      { error: "AI gagal menjawab. Periksa API key dan nama model." },
-      { status: 502 }
-    );
+    return NextResponse.json({ error: "AI gagal menjawab." }, { status: 502 });
   }
 
   const mentah = (jawaban as { aksi?: unknown } | null)?.aksi;
@@ -259,5 +262,5 @@ export async function POST(req: Request) {
 
   if (buang > 0) dilewati.push(`${buang} aksi dibuang karena formatnya tidak valid`);
 
-  return NextResponse.json({ usulan, dilewati });
+  return NextResponse.json({ usulan, dilewati, penyedia });
 }

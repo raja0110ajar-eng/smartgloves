@@ -16,6 +16,7 @@ const MENU = [
   { href: "/admin/audio", label: "Audio" },
   { href: "/admin/halaman", label: "Halaman" },
   { href: "/admin/ai", label: "AI" },
+  { href: "/admin/ai/status", label: "Status AI" },
   { href: "/admin/log", label: "Aktivitas" },
 ];
 
