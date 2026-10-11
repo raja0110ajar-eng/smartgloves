@@ -326,3 +326,25 @@ img, video { max-width: 100%; }
 .tanya-q { font-weight: 600; margin: 0 0 0.5rem; overflow-wrap: anywhere; }
 .tanya-a { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .tanya-meta { color: var(--redup); font-size: 0.85rem; margin: 0.5rem 0 0; }
+/* Aksesibilitas */
+.lewati {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 100;
+  background: var(--aksen);
+  color: var(--di-aksen);
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 8px 0;
+}
+.lewati:focus { left: 0; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--aksen); outline-offset: 2px; }
+#isi:focus { outline: none; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -30,7 +30,7 @@ export default function LoginPage() {
   // Kalau sudah login, langsung ke admin
   useEffect(() => {
     return onAuthStateChanged(auth, (u) => {
-      if (u) router.replace("/admin");
+     if (u) router.replace("/admin/ringkasan");
     });
   }, [router]);
 

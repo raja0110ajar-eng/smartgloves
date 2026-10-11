@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SmartGloves
 
-## Getting Started
+Prototipe sarung tangan pintar yang menerjemahkan isyarat tangan SIBI menjadi teks dan suara,
+dengan website untuk tampilan langsung, kamus isyarat, latihan, dan pengelolaan oleh admin.
 
-First, run the development server:
+> Prototipe edukasi, bukan pengganti juru bahasa isyarat. Cakupan: satu tangan, huruf dan kata dasar SIBI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Fitur
+- Demo live: teks real-time, suara dari browser, riwayat kalimat, skor kecocokan pose
+- Kamus isyarat dengan pencarian dan filter kategori
+- Latihan: level bertahap, Time Attack, Eja Kata dengan koreksi ejaan (Levenshtein)
+- Tanya SmartGloves: asisten AI yang menjawab dari isi situs
+- Admin: kata (CRUD), Mode Rekam pose, audio, halaman informasi, asisten AI, cadangan, log
+
+## Arsitektur
+```mermaid
+flowchart LR
+  G[ESP32 + sensor] -->|HTTPS + token| V[Vercel / Next.js]
+  V --> F[(Firestore)]
+  V --> S[(Supabase Storage)]
+  F -->|onSnapshot| B[Browser publik]
+  A[Admin] --> V
+  V --> AI[Gemini / OpenRouter]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Menjalankan
+1. `npm install`
+2. Salin `.env.example` menjadi `.env.local`, lalu isi nilainya
+3. `npm run dev`, buka http://localhost:3000
+4. `npm test` untuk tes otomatis
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Keamanan singkat
+- Penulisan data hanya lewat server (Firebase Admin SDK), klien hanya boleh membaca event
+- Admin memakai custom claim, perangkat memakai token, endpoint publik dilindungi CAPTCHA dan batas pemakaian
+- Pertanyaan pengunjung tidak disimpan, alamat IP hanya dalam bentuk hash
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Batas layanan gratis
+Firestore (Spark), Vercel (Hobby), Supabase (Free), Gemini dan OpenRouter (tier gratis). Semua punya kuota
+harian, dan situs menyediakan penjaga kuota untuk event dan asisten AI.
 
-## Learn More
+## Status
+- Web: berjalan
+- Firmware ESP32: [isi status]
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tim
+[Isi nama dan peran]

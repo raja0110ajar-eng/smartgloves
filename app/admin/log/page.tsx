@@ -19,6 +19,7 @@ const NAMA: Record<string, string> = {
   "POST /api/admin/halaman/contoh": "Buat halaman contoh",
   "POST /api/admin/ai/terapkan": "Terapkan aksi Asisten AI",
   "POST /api/admin/audio": "Unggah audio",
+  "POST /api/admin/impor": "Impor cadangan",
 };
 
 export default function LogAdmin() {

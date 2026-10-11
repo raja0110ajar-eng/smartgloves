@@ -11,12 +11,14 @@ import TemaToggle from "./TemaToggle";
 const BATAS_IDLE_MENIT = 30;
 
 const MENU = [
-  { href: "/admin", label: "Dasbor" },
+  { href: "/admin/ringkasan", label: "Ringkasan" },
+  { href: "/admin", label: "Kata" },
   { href: "/admin/rekam", label: "Rekam" },
   { href: "/admin/audio", label: "Audio" },
   { href: "/admin/halaman", label: "Halaman" },
   { href: "/admin/ai", label: "AI" },
   { href: "/admin/ai/status", label: "Status AI" },
+  { href: "/admin/cadangan", label: "Cadangan" },
   { href: "/admin/log", label: "Aktivitas" },
 ];
 

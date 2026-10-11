@@ -4,9 +4,18 @@ import SiteChrome from "@/components/SiteChrome";
 import { ambilMenu } from "@/lib/halaman";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.SITE_URL ?? "https://smartgloves.vercel.app"),
   title: "SmartGloves, penerjemah SIBI",
   description:
     "Sarung tangan pintar yang menerjemahkan isyarat tangan SIBI menjadi teks dan suara.",
+  openGraph: {
+    title: "SmartGloves, penerjemah SIBI",
+    description:
+      "Sarung tangan pintar yang menerjemahkan isyarat tangan SIBI menjadi teks dan suara.",
+    siteName: "SmartGloves",
+    locale: "id_ID",
+    type: "website",
+  },
 };
 
 export default async function RootLayout({

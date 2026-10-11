@@ -30,6 +30,9 @@ export default function SiteChrome({
 
   return (
     <>
+    <a href="#isi" className="lewati">
+        Lewati ke konten
+      </a>
       <header className="nav">
         <div className="nav-isi">
           <Link href="/" className="nav-merek">
@@ -50,7 +53,9 @@ export default function SiteChrome({
         </div>
       </header>
 
-      {children}
+      <div id="isi" tabIndex={-1}>
+        {children}
+      </div>
 
       <footer className="footer">
         <div
