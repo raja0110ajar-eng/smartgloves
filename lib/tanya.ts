@@ -32,7 +32,7 @@ export async function ambilKonteks(): Promise<Konteks> {
   if (simpan && Date.now() - simpan.ms < UMUR_MS) return simpan.k;
 
   const [hSnap, kSnap] = await Promise.all([
-    adminDb.collection("halaman").where("tampil", "==", true).get(),
+    adminDb.collection("halaman").get(),
     adminDb.collection("signs").where("aktif", "==", true).get(),
   ]);
 
