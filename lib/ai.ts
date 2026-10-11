@@ -107,7 +107,7 @@ async function melebihiBatasHarian(p: Penyedia) {
 export async function tanyaJson(
   instruksi: string,
   isi: string,
-  opsi: { valid?: (data: unknown) => boolean } = {}
+  opsi: { valid?: (data: unknown) => boolean; urutan?: Penyedia[] } = {}
 ): Promise<{ data: unknown; penyedia: Penyedia }> {
   const rincian: Rincian[] = [];
   let adaSiap = false;

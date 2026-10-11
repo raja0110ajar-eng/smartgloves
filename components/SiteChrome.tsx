@@ -24,6 +24,7 @@ export default function SiteChrome({
     ...menuHalaman,
     { href: "/kamus", label: "Kamus" },
     { href: "/latihan", label: "Latihan" },
+    { href: "/tanya", label: "Tanya" },
     { href: "/live", label: "Demo Live" },
   ];
 
