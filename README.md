@@ -40,7 +40,10 @@ harian, dan situs menyediakan penjaga kuota untuk event dan asisten AI.
 
 ## Status
 - Web: berjalan
-- Firmware ESP32: [isi status]
+- Firmware ESP32: belum ada
 
 ## Tim
-[Isi nama dan peran]
+1. Azizah
+2. Fatin 
+3. Pivel
+4. Reza
