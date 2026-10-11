@@ -267,3 +267,47 @@ img, video { max-width: 100%; }
   text-align: center;
 }
 .bintang { color: #e0b030; letter-spacing: 0.1em; }
+/* Login */
+.login {
+  max-width: 380px;
+  margin: 3rem auto;
+  padding: 0 1rem;
+  display: grid;
+  gap: 1rem;
+}
+.login-form { display: grid; gap: 0.9rem; }
+.login-form label { display: grid; gap: 0.35rem; }
+.tautan-tombol {
+  background: none;
+  border: none;
+  color: var(--aksen);
+  padding: 0;
+  text-align: left;
+  min-height: 0;
+  cursor: pointer;
+}
+.tautan-tombol:hover { text-decoration: underline; }
+
+/* Bilah admin */
+.adminbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--nav-bg, var(--bg));
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--garis);
+}
+.adminbar-isi {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.6rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.adminbar a { color: var(--redup); }
+.adminbar a[aria-current="page"] { color: var(--teks); font-weight: 600; }
+.adminbar-kembali { color: var(--aksen) !important; font-weight: 600; }
+.adminbar-menu { display: flex; gap: 1rem; flex-wrap: wrap; flex: 1; }
+.adminbar-kanan { display: flex; gap: 0.5rem; align-items: center; margin-left: auto; }

@@ -25,16 +25,21 @@ export function useAdmin() {
   const api = useCallback(
     async (path: string, method = "GET", body?: unknown) => {
       const token = await auth.currentUser?.getIdToken();
-      const res = await fetch(path, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: body ? JSON.stringify(body) : undefined,
-      });
+      let res: Response;
+      try {
+        res = await fetch(path, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: body ? JSON.stringify(body) : undefined,
+        });
+      } catch {
+        throw new Error("Koneksi bermasalah. Periksa sinyal lalu coba lagi.");
+      }
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? `gagal (HTTP ${res.status})`);
+      if (!res.ok) throw new Error(data.error ?? `Gagal (HTTP ${res.status})`);
       return data;
     },
     []

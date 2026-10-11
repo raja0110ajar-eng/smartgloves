@@ -145,13 +145,6 @@ export default function AdminPage() {
         </button>
       </div>
 
-      <p style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-        <a href="/admin/rekam">Mode Rekam →</a>
-        <a href="/admin/ai">Asisten AI →</a>
-        <a href="/admin/halaman">Halaman →</a>
-        <a href="/admin/audio">Audio →</a>
-      </p>
-
       <form onSubmit={tambah} style={{ display: "grid", gap: "0.5rem", margin: "1rem 0" }}>
         <input
           placeholder="Nama isyarat (mis. Halo)"
