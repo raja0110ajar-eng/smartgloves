@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import IsiMarkdown from "@/components/IsiMarkdown";
 import { useAdmin } from "@/lib/useAdmin";
 import { buatSlug } from "@/lib/slug";
 
@@ -227,7 +226,7 @@ export default function HalamanAdmin() {
 
           {lihat ? (
             <div className="markdown" style={{ minHeight: 200 }}>
-              <Markdown remarkPlugins={[remarkGfm]}>{form.isi}</Markdown>
+              <IsiMarkdown isi={form.isi} />
             </div>
           ) : (
             <textarea

@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/requireAdmin";
 import { bangunUlangRuleset } from "@/lib/ruleset";
 import { buatSlug } from "@/lib/slug";
 import { HalamanSchema } from "@/lib/schema";
+import { mediaUrlAman } from "@/lib/detail";
 import {
   ImporSchema,
   SignBackup,
@@ -96,6 +97,18 @@ export async function POST(req: Request) {
     if (audio) {
       data.audio_url = audio;
       if (s.audio_sumber) data.audio_sumber = s.audio_sumber;
+    }
+    if (s.arti !== undefined) data.arti = s.arti;
+    if (s.panduan !== undefined) data.panduan = s.panduan;
+    if (s.verifikasi) data.verifikasi = s.verifikasi;
+    const gambar = mediaUrlAman(s.gambar_url);
+    if (gambar && s.gambar_alt) {
+      data.gambar_url = gambar;
+      data.gambar_alt = s.gambar_alt;
+    }
+    if (s.video_id && s.video_deskripsi) {
+      data.video_id = s.video_id;
+      data.video_deskripsi = s.video_deskripsi;
     }
     if (!ada) {
       data.dibuat = FieldValue.serverTimestamp();

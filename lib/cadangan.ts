@@ -22,6 +22,19 @@ export const SignBackup = z.object({
   kondisi: Kondisi.optional(),
   durasi_tahan_ms: z.number().int().min(100).max(3000).optional(),
   audio_url: z.string().max(500).optional(),
+  arti: z.string().max(300).optional(),
+  panduan: z.string().max(600).optional(),
+  verifikasi: z
+    .object({
+      status: z.enum(["belum", "diverifikasi"]),
+      oleh: z.string().max(80),
+      tanggal: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/),
+    })
+    .optional(),
+  gambar_url: z.string().max(500).optional(),
+  gambar_alt: z.string().max(200).optional(),
+  video_id: z.string().regex(/^([A-Za-z0-9_-]{11})?$/).optional(),
+  video_deskripsi: z.string().max(500).optional(),
   audio_sumber: z.enum(["mesin", "unggahan"]).optional(),
 });
 export type SignBackupTipe = z.infer<typeof SignBackup>;

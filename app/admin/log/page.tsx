@@ -22,6 +22,10 @@ const NAMA: Record<string, string> = {
   "POST /api/admin/impor": "Impor cadangan",
   "POST /api/admin/perangkat": "Simulasi status perangkat",
   "DELETE /api/admin/perangkat": "Hapus catatan perangkat",
+  "PUT /api/admin/detail": "Ubah detail kata",
+  "POST /api/admin/media": "Unggah gambar",
+  "POST /api/admin/evaluasi": "Simpan sesi evaluasi",
+  "DELETE /api/admin/evaluasi": "Hapus sesi evaluasi",
 };
 
 export default function LogAdmin() {

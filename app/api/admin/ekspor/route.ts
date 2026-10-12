@@ -28,6 +28,17 @@ export async function GET(req: Request) {
     if (x.durasi_tahan_ms) o.durasi_tahan_ms = x.durasi_tahan_ms;
     if (x.audio_url) o.audio_url = x.audio_url;
     if (x.audio_sumber) o.audio_sumber = x.audio_sumber;
+    if (x.arti) o.arti = x.arti;
+    if (x.panduan) o.panduan = x.panduan;
+    if (x.verifikasi) o.verifikasi = x.verifikasi;
+    if (x.gambar_url) {
+      o.gambar_url = x.gambar_url;
+      o.gambar_alt = x.gambar_alt ?? "";
+    }
+    if (x.video_id) {
+      o.video_id = x.video_id;
+      o.video_deskripsi = x.video_deskripsi ?? "";
+    }
     return o;
   });
 

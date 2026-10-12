@@ -251,6 +251,9 @@ export default function AdminPage() {
                   >
                     Ubah
                   </button>
+                  <a href={`/admin/detail/${s.id}`}>
+                    <button type="button">Detail</button>
+                  </a>
                   <button onClick={() => ubahAktif(s)} disabled={sibuk}>
                     {s.aktif ? "Nonaktifkan" : "Aktifkan"}
                   </button>

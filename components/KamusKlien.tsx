@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { KATEGORI, LABEL_KATEGORI, type Kategori } from "@/lib/kategori";
+import Link from "next/link";
 
 export type KataKamus = {
   id: string;
@@ -79,6 +80,9 @@ export default function KamusKlien({ kata }: { kata: KataKamus[] }) {
             <div key={k.id} className="kartu">
               <h3>{k.nama}</h3>
               <p>{k.teks}</p>
+              <p>
+                <Link href={`/kamus/${k.id}`}>Lihat detail</Link>
+              </p>
               {k.audio_url && (
                 <button className="kartu-aksi" onClick={() => putar(k.audio_url)}>
                   Dengarkan

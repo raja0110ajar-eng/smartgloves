@@ -1,13 +1,12 @@
 import { adminDb } from "@/lib/firebaseAdmin";
 import { KATEGORI, type Kategori } from "@/lib/kategori";
 import KamusKlien, { type KataKamus } from "@/components/KamusKlien";
+import { KAMUS_HANYA_SIAP } from "@/lib/kamusAturan";
 
 export const revalidate = 300;
 export const metadata = { title: "Kamus isyarat, SmartGloves" };
 
-// true = hanya kata yang sudah punya rule (benar-benar bisa dikenali sarung tangan)
-// false = semua kata aktif
-const HANYA_YANG_PUNYA_RULE = true;
+const HANYA_YANG_PUNYA_RULE = KAMUS_HANYA_SIAP;
 
 async function ambilKata(): Promise<KataKamus[]> {
   try {

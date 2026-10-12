@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import IsiMarkdown from "@/components/IsiMarkdown";
 import { ambilHalaman } from "@/lib/halaman";
 
 export const revalidate = 300;
@@ -22,7 +21,7 @@ export default async function HalamanPage({ params }: Props) {
     <main className="kontainer bagian">
       <h1>{h.judul}</h1>
       <div className="markdown">
-        <Markdown remarkPlugins={[remarkGfm]}>{h.isi}</Markdown>
+        <IsiMarkdown isi={h.isi} />
       </div>
     </main>
   );
