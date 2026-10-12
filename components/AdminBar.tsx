@@ -19,6 +19,7 @@ const MENU = [
   { href: "/admin/audio", label: "Audio" },
   { href: "/admin/media", label: "Media" },
   { href: "/admin/halaman", label: "Halaman" },
+  { href: "/admin/ticker", label: "Teks berjalan" },
   { href: "/admin/ai", label: "AI" },
   { href: "/admin/ai/status", label: "Status AI" },
   { href: "/admin/cadangan", label: "Cadangan" },

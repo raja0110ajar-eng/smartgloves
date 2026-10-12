@@ -24,6 +24,7 @@ const NAMA: Record<string, string> = {
   "DELETE /api/admin/perangkat": "Hapus catatan perangkat",
   "PUT /api/admin/detail": "Ubah detail kata",
   "POST /api/admin/media": "Unggah gambar",
+  "PUT /api/admin/ticker": "Ubah teks berjalan",
   "POST /api/admin/evaluasi": "Simpan sesi evaluasi",
   "DELETE /api/admin/evaluasi": "Hapus sesi evaluasi",
 };
