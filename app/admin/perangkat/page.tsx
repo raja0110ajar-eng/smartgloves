@@ -4,7 +4,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAdmin } from "@/lib/useAdmin";
 import { kondisiPerangkat, teksDurasi } from "@/lib/statusBantu";
 
-type P = { id: string; detikLalu: number | null; fw: string; rssi: number | null };
+type P = {
+  id: string;
+  detikLalu: number | null;
+  fw: string;
+  rssi: number | null;
+  kiri: boolean | null;
+  vk: number | null;
+  vi: number | null;
+  bhs: string;
+};
 
 const LABEL = {
   belum: "Belum pernah terhubung",
@@ -103,6 +112,10 @@ export default function PerangkatAdmin() {
                 </span>
                 <span style={{ color: "var(--redup)", fontSize: "0.85rem" }}>
                   Firmware: {p.fw || "-"} · Sinyal WiFi: {p.rssi === null ? "-" : `${p.rssi} dBm`}
+                  <br />
+                  Tangan kiri: {p.kiri === null ? "tidak dilaporkan" : p.kiri ? "terhubung" : "tidak terhubung"} ·
+                  Baterai kanan: {p.vk === null ? "-" : `${p.vk} mV`} · Baterai kiri:{" "}
+                  {p.vi === null ? "-" : `${p.vi} mV`} · Bahasa aktif: {p.bhs || "-"}
                 </span>
               </span>
               <button onClick={() => hapus(p)} disabled={sibuk}>

@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { buatSlug } from "@/lib/slug";
 import { bangunUlangRuleset } from "@/lib/ruleset";
+import { normBahasa } from "@/lib/bahasa";
 import { CleanSchema } from "@/lib/schema";
 
 export const runtime = "nodejs";
@@ -31,7 +32,8 @@ export async function POST(req: Request) {
   const snap = await adminDb.collection("signs").limit(500).get();
   const grup = new Map<string, QueryDocumentSnapshot[]>();
   for (const d of snap.docs) {
-    const kunci = buatSlug(String(d.data().teks_output ?? "")) || `__${d.id}`;
+    const slugTeks = buatSlug(String(d.data().teks_output ?? ""));
+    const kunci = slugTeks ? `${normBahasa(d.data().bahasa)}:${slugTeks}` : `__${d.id}`;
     grup.set(kunci, [...(grup.get(kunci) ?? []), d]);
   }
 

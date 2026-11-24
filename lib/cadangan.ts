@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { KATEGORI } from "./kategori";
 import { SENSOR_KEYS } from "./schema";
+import { BAHASA } from "./bahasa";
+import { normKondisi } from "./pose";
 
 export const FORMAT = 1;
 
@@ -11,14 +13,15 @@ const Kondisi = z
       .refine((c) => c.min <= c.max)
   )
   .min(1)
-  .max(7);
+  .max(14);
 
 export const SignBackup = z.object({
   id: z.string().regex(/^[A-Za-z0-9_-]{1,100}$/),
   nama_isyarat: z.string().trim().min(1).max(50),
   teks_output: z.string().trim().min(1).max(100),
   kategori: z.enum(KATEGORI).optional(),
-  aktif: z.boolean(),
+  bahasa: z.enum(BAHASA).optional(),
+  aktif: z.boolean(), z,boolean(){},
   kondisi: Kondisi.optional(),
   durasi_tahan_ms: z.number().int().min(100).max(3000).optional(),
   audio_url: z.string().max(500).optional(),
@@ -56,4 +59,11 @@ export function audioUrlAman(url: string | undefined) {
   if (!url || !dasar) return undefined;
   const awalan = `${dasar.replace(/\/$/, "")}/storage/v1/object/public/audio/`;
   return url.startsWith(awalan) ? url : undefined;
+}
+// Cadangan lama memakai kunci sensor tanpa awalan tangan. Dipetakan ke tangan kanan (R_).
+export function normalisasiSign(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object") return raw;
+  const o = { ...(raw as Record<string, unknown>) };
+  if (Array.isArray(o.kondisi)) o.kondisi = normKondisi(o.kondisi);
+  return o;
 }

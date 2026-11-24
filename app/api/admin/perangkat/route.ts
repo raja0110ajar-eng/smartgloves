@@ -28,6 +28,10 @@ export async function GET(req: Request) {
         detikLalu: ms ? Math.max(0, Math.round((sekarang - ms) / 1000)) : null,
         fw: String(x.fw ?? ""),
         rssi: typeof x.rssi === "number" ? x.rssi : null,
+        kiri: typeof x.kiri === "boolean" ? x.kiri : null,
+        vk: typeof x.vk === "number" ? x.vk : null,
+        vi: typeof x.vi === "number" ? x.vi : null,
+        bhs: String(x.bhs ?? ""),
       };
     }),
   });

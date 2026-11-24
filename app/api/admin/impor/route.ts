@@ -5,12 +5,14 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { bangunUlangRuleset } from "@/lib/ruleset";
 import { buatSlug } from "@/lib/slug";
+import { kunciKata } from "@/lib/bahasa";
 import { HalamanSchema } from "@/lib/schema";
 import { mediaUrlAman } from "@/lib/detail";
 import {
   ImporSchema,
   SignBackup,
   audioUrlAman,
+  normalisasiSign,
   type SignBackupTipe,
 } from "@/lib/cadangan";
 
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
   const halaman: ReturnType<typeof HalamanSchema.parse>[] = [];
   const galat: string[] = [];
   berkas.signs.forEach((raw, i) => {
-    const p = SignBackup.safeParse(raw);
+    const p = SignBackup.safeParse(normalisasiSign(raw));
     if (p.success) signs.push(p.data);
     else galat.push(`Kata #${i + 1}: ${p.error.issues[0]?.message ?? "tidak valid"}`);
   });
@@ -49,13 +51,19 @@ export async function POST(req: Request) {
 
   // 2. Bandingkan dengan data yang sudah ada
   const [sSnap, hSnap] = await Promise.all([
-    adminDb.collection("signs").select("teks_output").limit(500).get(),
+    adminDb.collection("signs").select("teks_output", "bahasa").limit(500).get(),
     adminDb.collection("halaman").select("judul").limit(100).get(),
   ]);
   const idAda = new Set(sSnap.docs.map((d) => d.id));
   const pemilikTeks = new Map<string, string>();
   for (const d of sSnap.docs) {
-    pemilikTeks.set(buatSlug(String(d.data().teks_output ?? "")), d.id);
+    pemilikTeks.set(
+      kunciKata(
+        d.data().bahasa === "BISINDO" ? "BISINDO" : "SIBI",
+        buatSlug(String(d.data().teks_output ?? ""))
+      ),
+      d.id
+    );
   }
   const halAda = new Set(hSnap.docs.map((d) => d.id));
 
@@ -68,7 +76,13 @@ export async function POST(req: Request) {
   const slugDalamBerkas = new Set<string>();
 
   for (const s of signs) {
-    const slug = buatSlug(s.teks_output);
+    const bahasa = s.bahasa ?? "SIBI";
+    const dasar = buatSlug(s.teks_output);
+    if (!dasar) {
+      ringkas.sign.kembar++;
+      continue;
+    }
+    const slug = kunciKata(bahasa, dasar);
     const pemilik = pemilikTeks.get(slug);
     if (!slug || slugDalamBerkas.has(slug) || (pemilik && pemilik !== s.id)) {
       ringkas.sign.kembar++;
@@ -86,6 +100,7 @@ export async function POST(req: Request) {
       nama_isyarat: s.nama_isyarat,
       teks_output: s.teks_output,
       kategori: s.kategori ?? "kata",
+      bahasa,
       aktif: s.aktif,
       diubah: FieldValue.serverTimestamp(),
     };

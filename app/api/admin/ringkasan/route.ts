@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireAdmin } from "@/lib/requireAdmin";
-import { cariTumpangTindih, type Kondisi, type StaticRule } from "@/lib/pose";
+import { cariTumpangTindih, normKondisi, type StaticRule } from "@/lib/pose";
+import { normBahasa } from "@/lib/bahasa";
 import { ambilPakai } from "@/lib/ai";
 import { hariIni } from "@/lib/tanya";
 import { batasEventHarian } from "@/lib/deviceAuth";
@@ -49,7 +50,8 @@ export async function GET(req: Request) {
         sign_id: d.id,
         teks,
         durasi_tahan_ms: Number(x.durasi_tahan_ms ?? 400),
-        kondisi: x.kondisi as Kondisi[],
+        bahasa: normBahasa(x.bahasa),
+        kondisi: normKondisi(x.kondisi),
       });
     } else {
       tanpaRule.push(teks);
@@ -64,6 +66,7 @@ export async function GET(req: Request) {
     for (let j = i + 1; j < rules.length; j++) {
       const a = rules[i];
       const b = rules[j];
+      if (a.bahasa !== b.bahasa) continue;
       if (
         cariTumpangTindih(a.kondisi, [b]).length > 0 &&
         cariTumpangTindih(b.kondisi, [a]).length > 0

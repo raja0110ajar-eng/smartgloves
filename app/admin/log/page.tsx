@@ -25,6 +25,7 @@ const NAMA: Record<string, string> = {
   "PUT /api/admin/detail": "Ubah detail kata",
   "POST /api/admin/media": "Unggah gambar",
   "PUT /api/admin/ticker": "Ubah teks berjalan",
+  "POST /api/admin/migrasi": "Migrasi data dua tangan",
   "POST /api/admin/evaluasi": "Simpan sesi evaluasi",
   "DELETE /api/admin/evaluasi": "Hapus sesi evaluasi",
 };

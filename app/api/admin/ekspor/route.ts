@@ -22,6 +22,7 @@ export async function GET(req: Request) {
       nama_isyarat: x.nama_isyarat,
       teks_output: x.teks_output,
       kategori: x.kategori ?? "kata",
+      bahasa: x.bahasa ?? "SIBI",
       aktif: x.aktif === true,
     };
     if (Array.isArray(x.kondisi) && x.kondisi.length > 0) o.kondisi = x.kondisi;

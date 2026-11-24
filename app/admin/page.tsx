@@ -6,18 +6,22 @@ import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebaseClient";
 import { useAdmin } from "@/lib/useAdmin";
 import { KATEGORI, LABEL_KATEGORI, type Kategori } from "@/lib/kategori";
+import { BAHASA, type Bahasa } from "@/lib/bahasa";
+import { LABEL_TANGAN, type JenisTangan } from "@/lib/pose";
 
 type Sign = {
   id: string;
   nama_isyarat: string;
   teks_output: string;
   kategori: string;
+  bahasa: Bahasa;
+  tangan: JenisTangan | null;
   aktif: boolean;
   audio_url: string;
   punya_rule: boolean;
 };
 
-type Edit = { id: string; nama: string; teks: string; kategori: string };
+type Edit = { id: string; nama: string; teks: string; kategori: string; bahasa: Bahasa };
 
 export default function AdminPage() {
   const router = useRouter();
@@ -26,6 +30,8 @@ export default function AdminPage() {
   const [nama, setNama] = useState("");
   const [teks, setTeks] = useState("");
   const [kategori, setKategori] = useState<Kategori>("kata");
+  const [bahasaBaru, setBahasaBaru] = useState<Bahasa>("SIBI");
+  const [filter, setFilter] = useState<Bahasa | "semua">("semua");
   const [edit, setEdit] = useState<Edit | null>(null);
   const [pesan, setPesan] = useState("");
   const [sibuk, setSibuk] = useState(false);
@@ -64,10 +70,11 @@ export default function AdminPage() {
         nama_isyarat: nama,
         teks_output: teks,
         kategori,
+        bahasa: bahasaBaru,
       });
       setNama("");
       setTeks("");
-      return "Kata ditambahkan.";
+      return `Kata ditambahkan ke ${bahasaBaru}.`;
     });
   }
 
@@ -79,6 +86,7 @@ export default function AdminPage() {
         nama_isyarat: edit.nama,
         teks_output: edit.teks,
         kategori: edit.kategori,
+        bahasa: edit.bahasa,
       });
       setEdit(null);
       return d.perlu_audio
@@ -97,7 +105,7 @@ export default function AdminPage() {
   }
 
   function hapus(s: Sign) {
-    if (!confirm(`Hapus permanen "${s.teks_output}"? Ini tidak bisa dibatalkan.`)) return;
+    if (!confirm(`Hapus permanen "${s.teks_output}" (${s.bahasa})? Ini tidak bisa dibatalkan.`)) return;
     return jalankan(async () => {
       await api("/api/admin/signs", "DELETE", { id: s.id });
       return "Dihapus.";
@@ -136,8 +144,11 @@ export default function AdminPage() {
     );
   }
 
+  const tampil = signs.filter((s) => filter === "semua" || s.bahasa === filter);
+  const hitung = (b: Bahasa) => signs.filter((s) => s.bahasa === b).length;
+
   return (
-    <main style={{ maxWidth: 680, margin: "2rem auto", padding: "0 1rem" }}>
+    <main style={{ maxWidth: 720, margin: "2rem auto", padding: "0 1rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1>Admin SmartGloves</h1>
         <button onClick={() => signOut(auth).then(() => router.replace("/login"))}>
@@ -146,6 +157,13 @@ export default function AdminPage() {
       </div>
 
       <form onSubmit={tambah} style={{ display: "grid", gap: "0.5rem", margin: "1rem 0" }}>
+        <select value={bahasaBaru} onChange={(e) => setBahasaBaru(e.target.value as Bahasa)}>
+          {BAHASA.map((b) => (
+            <option key={b} value={b}>
+              Bahasa isyarat: {b}
+            </option>
+          ))}
+        </select>
         <input
           placeholder="Nama isyarat (mis. Halo)"
           value={nama}
@@ -173,14 +191,25 @@ export default function AdminPage() {
       {pesan && <p>{pesan}</p>}
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-        <h2>Daftar kata ({signs.length})</h2>
+        <h2 style={{ margin: 0 }}>Daftar kata ({tampil.length})</h2>
         <button onClick={bersihkan} disabled={sibuk}>
           Bersihkan duplikat
         </button>
       </div>
 
+      <div className="chips" style={{ margin: "0.75rem 0" }}>
+        <button className="chip" aria-pressed={filter === "semua"} onClick={() => setFilter("semua")}>
+          Semua ({signs.length})
+        </button>
+        {BAHASA.map((b) => (
+          <button key={b} className="chip" aria-pressed={filter === b} onClick={() => setFilter(b)}>
+            {b} ({hitung(b)})
+          </button>
+        ))}
+      </div>
+
       <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.5rem" }}>
-        {signs.map((s) => (
+        {tampil.map((s) => (
           <li
             key={s.id}
             style={{
@@ -192,6 +221,16 @@ export default function AdminPage() {
           >
             {edit && edit.id === s.id ? (
               <div style={{ display: "grid", gap: "0.5rem" }}>
+                <select
+                  value={edit.bahasa}
+                  onChange={(e) => setEdit({ ...edit, bahasa: e.target.value as Bahasa })}
+                >
+                  {BAHASA.map((b) => (
+                    <option key={b} value={b}>
+                      Bahasa isyarat: {b}
+                    </option>
+                  ))}
+                </select>
                 <input
                   value={edit.nama}
                   onChange={(e) => setEdit({ ...edit, nama: e.target.value })}
@@ -222,12 +261,15 @@ export default function AdminPage() {
             ) : (
               <>
                 <div>
+                  <span className="lencana">{s.bahasa}</span>{" "}
                   <strong>{s.nama_isyarat}</strong> → {s.teks_output}
                 </div>
                 <div style={{ fontSize: "0.85rem", opacity: 0.7 }}>
                   {s.kategori} · {s.aktif ? "aktif" : "nonaktif"} ·{" "}
-                  {s.punya_rule ? "ada rule" : "belum ada rule"} ·{" "}
-                  {s.audio_url ? "ada audio" : "belum ada audio"}
+                  {s.punya_rule
+                    ? `ada rule (${s.tangan ? LABEL_TANGAN[s.tangan].toLowerCase() : "-"})`
+                    : "belum ada rule"}{" "}
+                  · {s.audio_url ? "ada audio" : "belum ada audio"}
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
                   {s.audio_url && (
@@ -238,6 +280,9 @@ export default function AdminPage() {
                       Simulasikan
                     </button>
                   )}
+                  <a href={`/admin/detail/${s.id}`}>
+                    <button type="button">Detail</button>
+                  </a>
                   <button
                     onClick={() =>
                       setEdit({
@@ -245,15 +290,13 @@ export default function AdminPage() {
                         nama: s.nama_isyarat,
                         teks: s.teks_output,
                         kategori: s.kategori,
+                        bahasa: s.bahasa,
                       })
                     }
                     disabled={sibuk}
                   >
                     Ubah
                   </button>
-                  <a href={`/admin/detail/${s.id}`}>
-                    <button type="button">Detail</button>
-                  </a>
                   <button onClick={() => ubahAktif(s)} disabled={sibuk}>
                     {s.aktif ? "Nonaktifkan" : "Aktifkan"}
                   </button>

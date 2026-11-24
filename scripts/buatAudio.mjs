@@ -81,12 +81,20 @@ if (berhasil > 0) {
   const statis = aktif.docs.flatMap((d) => {
     const x = d.data();
     if (!Array.isArray(x.kondisi) || x.kondisi.length === 0) return [];
+    const kondisi = x.kondisi
+      .filter((c) => c && typeof c.sensor === "string")
+      .map((c) => ({
+        sensor: /^[RL]_/.test(c.sensor) ? c.sensor : `R_${c.sensor}`,
+        min: c.min,
+        max: c.max,
+      }));
     return [
       {
         sign_id: d.id,
         teks: String(x.teks_output),
+        bahasa: x.bahasa === "BISINDO" ? "BISINDO" : "SIBI",
         durasi_tahan_ms: Number(x.durasi_tahan_ms ?? 400),
-        kondisi: x.kondisi,
+        kondisi,
         audio_url: x.audio_url ?? null,
       },
     ];

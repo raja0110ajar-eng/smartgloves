@@ -1,18 +1,21 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "./firebaseAdmin";
-import type { Kondisi, StaticRule } from "./pose";
+import { normKondisi, type StaticRule } from "./pose";
+import { normBahasa } from "./bahasa";
 
 export async function ambilRuleAktif(): Promise<StaticRule[]> {
   const snap = await adminDb.collection("signs").where("aktif", "==", true).get();
   return snap.docs.flatMap((d) => {
     const x = d.data();
-    if (!Array.isArray(x.kondisi) || x.kondisi.length === 0) return [];
+    const kondisi = normKondisi(x.kondisi);
+    if (kondisi.length === 0) return [];
     return [
       {
         sign_id: d.id,
         teks: String(x.teks_output),
+        bahasa: normBahasa(x.bahasa),
         durasi_tahan_ms: Number(x.durasi_tahan_ms ?? 400),
-        kondisi: x.kondisi as Kondisi[],
+        kondisi,
         audio_url: (x.audio_url as string | undefined) ?? null,
       },
     ];

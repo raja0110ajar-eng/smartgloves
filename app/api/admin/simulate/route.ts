@@ -3,6 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { SimulateSchema } from "@/lib/schema";
+import { normBahasa } from "@/lib/bahasa";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,7 @@ export async function POST(req: Request) {
   await adminDb.collection("events").add({
     sign_id: doc.id,
     teks: doc.data()?.teks_output,
+    bahasa: normBahasa(doc.data()?.bahasa),
     device_id: "simulator",
     skor: Math.round(80 + Math.random() * 19),
     waktu: FieldValue.serverTimestamp(),

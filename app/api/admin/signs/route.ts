@@ -4,6 +4,8 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { buatSlug } from "@/lib/slug";
 import { bangunUlangRuleset } from "@/lib/ruleset";
+import { idKata, normBahasa, type Bahasa } from "@/lib/bahasa";
+import { jenisTangan, normKondisi } from "@/lib/pose";
 import {
   SignCreateSchema,
   SignDeleteSchema,
@@ -18,11 +20,18 @@ const salah = (pesan: string, status = 400) =>
   NextResponse.json({ error: pesan }, { status });
 const bacaBody = (req: Request) => req.json().catch(() => null);
 
-// Cari kata lain yang teksnya sama (huruf besar/kecil dan tanda baca diabaikan)
-async function cariKembar(slug: string, kecualiId?: string) {
-  const snap = await adminDb.collection("signs").select("teks_output").limit(500).get();
+// Cari kata lain dengan teks sama DI BAHASA YANG SAMA (huruf besar/kecil dan tanda baca diabaikan)
+async function cariKembar(bahasa: Bahasa, slug: string, kecualiId?: string) {
+  const snap = await adminDb
+    .collection("signs")
+    .select("teks_output", "bahasa")
+    .limit(500)
+    .get();
   return snap.docs.find(
-    (d) => d.id !== kecualiId && buatSlug(String(d.data().teks_output ?? "")) === slug
+    (d) =>
+      d.id !== kecualiId &&
+      normBahasa(d.data().bahasa) === bahasa &&
+      buatSlug(String(d.data().teks_output ?? "")) === slug
   );
 }
 
@@ -35,14 +44,17 @@ export async function GET(req: Request) {
     .get();
   const signs = snap.docs.map((d) => {
     const x = d.data();
+    const kondisi = normKondisi(x.kondisi);
     return {
       id: d.id,
       nama_isyarat: x.nama_isyarat,
       teks_output: x.teks_output,
-      aktif: x.aktif === true,
       kategori: x.kategori ?? "kata",
+      bahasa: normBahasa(x.bahasa),
+      tangan: jenisTangan(kondisi),
+      aktif: x.aktif === true,
       audio_url: x.audio_url ?? "",
-      punya_rule: Array.isArray(x.kondisi) && x.kondisi.length > 0,
+      punya_rule: kondisi.length > 0,
     };
   });
   return NextResponse.json({ signs });
@@ -53,18 +65,22 @@ export async function POST(req: Request) {
   const parsed = SignCreateSchema.safeParse(await bacaBody(req));
   if (!parsed.success) return salah("Data tidak valid.");
 
+  const bahasa: Bahasa = parsed.data.bahasa ?? "SIBI";
   const slug = buatSlug(parsed.data.teks_output);
   if (!slug) return salah("Teks harus berisi huruf atau angka.");
 
-  const pesanKembar = `Kata "${parsed.data.teks_output}" sudah ada.`;
-  if (await cariKembar(slug)) return salah(pesanKembar, 409);
+  const pesanKembar = `Kata "${parsed.data.teks_output}" sudah ada di ${bahasa}.`;
+  if (await cariKembar(bahasa, slug)) return salah(pesanKembar, 409);
 
+  const id = idKata(bahasa, slug);
   try {
     // create() gagal kalau ID sudah ada, jadi aman walau dua permintaan datang bersamaan
-    await adminDb.collection("signs").doc(slug).create({
-      ...parsed.data,
-      aktif: true,
+    await adminDb.collection("signs").doc(id).create({
+      nama_isyarat: parsed.data.nama_isyarat,
+      teks_output: parsed.data.teks_output,
       kategori: parsed.data.kategori ?? "kata",
+      bahasa,
+      aktif: true,
       versi: 1,
       dibuat: FieldValue.serverTimestamp(),
       diubah: FieldValue.serverTimestamp(),
@@ -73,7 +89,7 @@ export async function POST(req: Request) {
     if ((e as { code?: number }).code === 6) return salah(pesanKembar, 409);
     throw e;
   }
-  return NextResponse.json({ ok: true, id: slug });
+  return NextResponse.json({ ok: true, id });
 }
 
 export async function PUT(req: Request) {
@@ -86,26 +102,32 @@ export async function PUT(req: Request) {
   const doc = await ref.get();
   if (!doc.exists) return salah("Kata tidak ditemukan.", 404);
 
+  const lama = doc.data()!;
+  const bahasaLama = normBahasa(lama.bahasa);
+  const bahasa: Bahasa = parsed.data.bahasa ?? bahasaLama;
+
   const slug = buatSlug(teks_output);
   if (!slug) return salah("Teks harus berisi huruf atau angka.");
-  if (await cariKembar(slug, id)) {
-    return salah(`Kata "${teks_output}" sudah ada.`, 409);
+  if (await cariKembar(bahasa, slug, id)) {
+    return salah(`Kata "${teks_output}" sudah ada di ${bahasa}.`, 409);
   }
 
-  const lama = doc.data()!;
   const teksBerubah = lama.teks_output !== teks_output;
+  const bahasaBerubah = bahasa !== bahasaLama;
   await ref.update({
     nama_isyarat,
     teks_output,
+    bahasa,
     ...(kategori ? { kategori } : {}),
     // teks berubah = audio lama tidak cocok lagi, hapus supaya dibuat ulang
     ...(teksBerubah ? { audio_url: FieldValue.delete() } : {}),
     diubah: FieldValue.serverTimestamp(),
   });
 
-  const memengaruhiRuleset =
-    lama.aktif === true && Array.isArray(lama.kondisi) && lama.kondisi.length > 0;
-  if (teksBerubah && memengaruhiRuleset) await bangunUlangRuleset();
+  const punyaRule = normKondisi(lama.kondisi).length > 0;
+  if ((teksBerubah || bahasaBerubah) && lama.aktif === true && punyaRule) {
+    await bangunUlangRuleset();
+  }
 
   return NextResponse.json({ ok: true, perlu_audio: teksBerubah });
 }
