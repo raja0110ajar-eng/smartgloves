@@ -1,14 +1,15 @@
 import { adminDb } from "@/lib/firebaseAdmin";
 import { KATEGORI, type Kategori } from "@/lib/kategori";
+import { normBahasa } from "@/lib/bahasa";
+import { jenisTangan, normKondisi } from "@/lib/pose";
 import type { Kata } from "@/lib/latihan";
-import LatihanKlien from "@/components/LatihanKlien";
+import LatihanBahasa from "@/components/LatihanBahasa";
 
 export const revalidate = 300;
 export const metadata = { title: "Latihan isyarat, SmartGloves" };
 
-// SEMENTARA false: selama belum ada sarung tangan, semua kata aktif bisa dilatih
-// lewat panel uji. Ubah ke true kalau perangkat sudah dipakai, supaya hanya
-// isyarat yang benar-benar punya rule yang muncul.
+// Secara bawaan hanya isyarat yang sudah punya rule. Untuk menguji di laptop tanpa merekam semuanya,
+// isi LATIHAN_SEMUA_KATA=true di .env.local (jangan di Vercel).
 const HANYA_YANG_PUNYA_RULE = process.env.LATIHAN_SEMUA_KATA !== "true";
 
 async function ambilKata(): Promise<Kata[]> {
@@ -17,13 +18,16 @@ async function ambilKata(): Promise<Kata[]> {
     return snap.docs
       .map((d) => {
         const x = d.data();
+        const kondisi = normKondisi(x.kondisi);
         const kat = String(x.kategori ?? "kata");
         return {
           id: d.id,
           nama: String(x.nama_isyarat ?? ""),
           teks: String(x.teks_output ?? ""),
           kategori: (KATEGORI as readonly string[]).includes(kat) ? (kat as Kategori) : "kata",
-          siap: Array.isArray(x.kondisi) && x.kondisi.length > 0,
+          bahasa: normBahasa(x.bahasa),
+          tangan: jenisTangan(kondisi),
+          siap: kondisi.length > 0,
         };
       })
       .filter((k) => !HANYA_YANG_PUNYA_RULE || k.siap)
@@ -39,7 +43,7 @@ export default async function LatihanPage() {
   return (
     <main className="kontainer bagian">
       <h1>Latihan isyarat</h1>
-      <LatihanKlien kata={kata} />
+      <LatihanBahasa kata={kata} />
     </main>
   );
 }

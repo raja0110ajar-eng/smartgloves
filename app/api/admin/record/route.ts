@@ -9,6 +9,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const doc = await adminDb.collection("recordings").doc("latest").get();
-  if (!doc.exists) return NextResponse.json({ samples: [] });
-  return NextResponse.json({ samples: doc.data()?.samples ?? [] });
+  if (!doc.exists) return NextResponse.json({ samples: [], waktu: 0 });
+  return NextResponse.json({
+    samples: doc.data()?.samples ?? [],
+    waktu: doc.data()?.waktu?.toMillis?.() ?? 0,
+  });
 }

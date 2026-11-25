@@ -1,5 +1,5 @@
 import { adminDb } from "@/lib/firebaseAdmin";
-import { SesiSchema, hitungStatistik, type SesiData } from "@/lib/evaluasi";
+import { SesiSchema, hitungStatistik, ringkasPerBahasa, type SesiData } from "@/lib/evaluasi";
 
 export const revalidate = 600;
 export const metadata = { title: "Pengujian, SmartGloves" };
@@ -12,7 +12,7 @@ async function ambil() {
   try {
     const [sSnap, kSnap] = await Promise.all([
       adminDb.collection("evaluasi_sesi").orderBy("dibuat", "desc").limit(200).get(),
-      adminDb.collection("signs").select("teks_output").get(),
+      adminDb.collection("signs").select("teks_output", "bahasa").get(),
     ]);
     const sesi: SesiData[] = sSnap.docs.flatMap((d) => {
       const x = d.data();
@@ -24,9 +24,17 @@ async function ambil() {
       });
       return p.success ? [p.data] : [];
     });
-    const nama = new Map(kSnap.docs.map((d) => [d.id, String(d.data().teks_output ?? d.id)]));
+    const nama = new Map<string, { teks: string; bahasa: string }>();
+    for (const d of kSnap.docs) {
+      nama.set(d.id, {
+        teks: String(d.data().teks_output ?? d.id),
+        bahasa: d.data().bahasa === "BISINDO" ? "BISINDO" : "SIBI",
+      });
+    }
     const terakhir = sSnap.docs.find((d) => d.data().simulasi !== true)?.data().dibuat?.toMillis?.() ?? 0;
-    return { stat: hitungStatistik(sesi), nama, terakhir };
+    const stat = hitungStatistik(sesi);
+    const perBahasa = ringkasPerBahasa(stat.perSign, (id) => nama.get(id)?.bahasa);
+    return { stat, nama, terakhir, perBahasa };
   } catch {
     return null;
   }
@@ -34,7 +42,10 @@ async function ambil() {
 
 export default async function PengujianPage() {
   const data = await ambil();
-  const nama = (id: string) => data?.nama.get(id) ?? "(isyarat dihapus)";
+  const nama = (id: string) => {
+    const i = data?.nama.get(id);
+    return i ? `${i.teks} (${i.bahasa})` : "(isyarat dihapus)";
+  };
 
   return (
     <main className="kontainer bagian">
@@ -78,6 +89,19 @@ export default async function PengujianPage() {
             </div>
           </div>
 
+          {data.perBahasa.length > 0 && (
+            <>
+              <h2>Per bahasa</h2>
+              <ul>
+                {data.perBahasa.map((b) => (
+                  <li key={b.bahasa}>
+                    <strong>{b.bahasa}</strong>: {pct(b.akurasi)} ({pct(b.ciBawah)} sampai {pct(b.ciAtas)}),{" "}
+                    {b.benar} benar dari {b.n} percobaan
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
           <h2>Per isyarat</h2>
           <div className="tabel-wadah">
             <table className="tabel">

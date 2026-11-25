@@ -55,6 +55,8 @@ export async function GET(req: Request) {
       aktif: x.aktif === true,
       audio_url: x.audio_url ?? "",
       punya_rule: kondisi.length > 0,
+      kondisi,
+      durasi_tahan_ms: Number(x.durasi_tahan_ms ?? 400),
     };
   });
   return NextResponse.json({ signs });

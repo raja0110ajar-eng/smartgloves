@@ -250,3 +250,33 @@ export function reduksiSesi(s: Sesi, a: AksiSesi): Sesi {
     }
   }
 }
+export type RingkasBahasa = {
+  bahasa: string;
+  n: number;
+  benar: number;
+  akurasi: number;
+  ciBawah: number;
+  ciAtas: number;
+};
+
+// Akurasi digabung per bahasa. "bahasaDari" memetakan ID isyarat ke bahasanya.
+export function ringkasPerBahasa(
+  perSign: StatSign[],
+  bahasaDari: (id: string) => string | undefined
+): RingkasBahasa[] {
+  const peta = new Map<string, { n: number; benar: number }>();
+  for (const s of perSign) {
+    const b = bahasaDari(s.id);
+    if (!b) continue;
+    const g = peta.get(b) ?? { n: 0, benar: 0 };
+    g.n += s.n;
+    g.benar += s.benar;
+    peta.set(b, g);
+  }
+  return [...peta.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([bahasa, g]) => {
+      const [lo, hi] = wilson(g.benar, g.n);
+      return { bahasa, n: g.n, benar: g.benar, akurasi: g.n ? g.benar / g.n : 0, ciBawah: lo, ciAtas: hi };
+    });
+}

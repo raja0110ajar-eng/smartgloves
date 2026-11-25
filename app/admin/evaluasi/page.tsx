@@ -18,6 +18,7 @@ type Sign = {
   teks_output: string;
   aktif: boolean;
   punya_rule: boolean;
+  bahasa: "SIBI" | "BISINDO";
 };
 
 type Tersimpan = {
@@ -34,6 +35,10 @@ type Tersimpan = {
 
 const csv = (v: string | number | null | boolean) =>
   `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+function labelSign(s: { teks_output: string; bahasa: string } | undefined, id: string) {
+  return s ? `${s.teks_output} (${s.bahasa})` : id;
+}
 
 export default function EvaluasiAdmin() {
   const { ready, isAdmin, api } = useAdmin();
@@ -112,7 +117,7 @@ export default function EvaluasiAdmin() {
   }, [s.fase]);
 
   const nama = (id: string | null) =>
-    id === null ? "tidak terdeteksi" : (signs.find((x) => x.id === id)?.teks_output ?? id);
+    id === null ? "tidak terdeteksi" : labelSign(signs.find((x) => x.id === id), id);
 
   async function jalankan(aksi: () => Promise<string | void>) {
     if (kunci.current) return;
@@ -270,6 +275,23 @@ export default function EvaluasiAdmin() {
 
           <div>
             <strong>Isyarat yang diuji ({pilih.size}/{signs.length})</strong>
+            <div className="chips" style={{ margin: "0.5rem 0" }}>
+              {(["SIBI", "BISINDO"] as const).map((b) => (
+                <button
+                  key={b}
+                  className="chip"
+                  onClick={() => setPilih(new Set(signs.filter((x) => x.bahasa === b).map((x) => x.id)))}
+                >
+                  Hanya {b}
+                </button>
+              ))}
+              <button className="chip" onClick={() => setPilih(new Set(signs.map((x) => x.id)))}>
+                Semua
+              </button>
+            </div>
+            <p className="catatan" style={{ maxWidth: "none" }}>
+              Pastikan sarung tangan berbahasa sama dengan isyarat yang diuji.
+            </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1rem", marginTop: "0.5rem" }}>
               {signs.map((x) => (
                 <label key={x.id} style={{ display: "flex", gap: "0.35rem", alignItems: "center" }}>
@@ -283,7 +305,7 @@ export default function EvaluasiAdmin() {
                       setPilih(baru);
                     }}
                   />
-                  {x.teks_output}
+                {x.teks_output} ({x.bahasa})
                 </label>
               ))}
               {signs.length === 0 && (

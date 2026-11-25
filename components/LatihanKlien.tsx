@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebaseClient";
+import type { Bahasa } from "@/lib/bahasa";
 import {
   AWAL,
   DETIK_TIME_ATTACK,
@@ -21,6 +22,7 @@ import {
   kataEjaTersedia,
   kocok,
   kunciLevel,
+  kunciProgres,
   namaLevel,
   progresKosong,
   reduksi,
@@ -31,12 +33,14 @@ import {
 
 const bintangTeks = (n: number) => "★".repeat(n) + "☆".repeat(3 - n);
 
-export default function LatihanKlien({ kata }: { kata: Kata[] }) {
+export default function LatihanKlien({ kata, bahasa }: { kata: Kata[]; bahasa: Bahasa }) {
   const [g, kirim] = useReducer(reduksi, AWAL);
   const [progres, setProgres] = useState<Progres>(progresKosong);
   const [isAdmin, setIsAdmin] = useState(false);
   const pertama = useRef(true);
-  const disimpan = useRef(false);
+   const disimpan = useRef(false);
+  const bahasaRef = useRef<Bahasa>(bahasa);
+  const [bahasaBeda, setBahasaBeda] = useState<Bahasa | null>(null);
 
   const level = useMemo(() => bangunLevel(kata), [kata]);
   const kamusEja = useMemo(() => kataEjaTersedia(kata), [kata]);
@@ -52,7 +56,7 @@ export default function LatihanKlien({ kata }: { kata: Kata[] }) {
 
   // Muat progres dari browser
   useEffect(() => {
-    setProgres(bacaProgres());
+    setProgres(bacaProgres(kunciProgres(bahasa)));
   }, []);
 
   // Apakah pengunjung ini admin? (untuk panel uji)
@@ -87,17 +91,24 @@ export default function LatihanKlien({ kata }: { kata: Kata[] }) {
               sign_id: String(x.sign_id ?? ""),
               teks: String(x.teks ?? ""),
               skor: typeof x.skor === "number" ? x.skor : null,
+              bahasa: x.bahasa === "BISINDO" ? ("BISINDO" as const) : ("SIBI" as const),
               ms: x.waktu?.toMillis?.() ?? Date.now(),
             };
           })
           .sort((a, b) => a.ms - b.ms)
-          .forEach((e) =>
+          .forEach((e) => {
+            // Event dari bahasa lain tidak dihitung, tapi pemain diberi tahu
+            if (e.bahasa !== bahasaRef.current) {
+              setBahasaBeda(e.bahasa);
+              return;
+            }
+            setBahasaBeda(null);
             kirim({
               tipe: "event",
               e: { sign_id: e.sign_id, teks: e.teks, skor: e.skor },
               sekarang: Date.now(),
-            })
-          );
+            });
+          });
       },
       () => {}
     );
@@ -116,7 +127,7 @@ export default function LatihanKlien({ kata }: { kata: Kata[] }) {
     if (g.fase !== "selesai" || disimpan.current) return;
     disimpan.current = true;
 
-    const p = bacaProgres();
+    const p = bacaProgres(kunciProgres(bahasa));
     if (g.mode === "level") {
       const bintang = hitungBintang(g.benar, g.antrean.length);
       const kunci = kunciLevel(g.antrean);
@@ -130,7 +141,7 @@ export default function LatihanKlien({ kata }: { kata: Kata[] }) {
     } else if (g.mode === "eja") {
       p.eja = Math.max(p.eja, g.poin);
     }
-    simpanProgres(p);
+  simpanProgres(p, kunciProgres(bahasa));
     setProgres(p);
   }, [g]);
 
@@ -383,6 +394,12 @@ export default function LatihanKlien({ kata }: { kata: Kata[] }) {
           {g.mode === "eja" ? "Eja kata ini huruf demi huruf:" : "Peragakan isyarat ini:"}
         </p>
         <h1 className="latih-target">{targetTeks}</h1>
+        {bahasaBeda && (
+          <p className="umpan salah" role="alert">
+            Sarung tangan terbaca berbahasa {bahasaBeda}, sedangkan latihan ini {bahasa}. Tahan tombol
+            sarung tangan sekitar 1 detik untuk berganti bahasa.
+          </p>
+        )}
 
         {g.mode === "eja" && targetTeks && (
           <div className="slots">

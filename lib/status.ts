@@ -3,6 +3,7 @@ import { batasEventHarian } from "./deviceAuth";
 import { hariIni } from "./tanya";
 import { kondisiPerangkat } from "./statusBantu";
 import { normBahasa, type Bahasa } from "./bahasa";
+import { persenBaterai } from "./baterai";
 
 const JEDA_TULIS_MS = 100_000; // dicatat paling sering sekali per ~100 detik per perangkat
 
@@ -55,5 +56,6 @@ export async function ambilStatusPublik() {
     batasTercapai: Number(bDoc.data()?.n ?? 0) >= batasEventHarian(),
     kiri: typeof d?.kiri === "boolean" ? d.kiri : null,
     bahasa: d?.bhs ? normBahasa(d.bhs) : null,
+    baterai: { kanan: persenBaterai(d?.vk), kiri: persenBaterai(d?.vi) },
   };
 }

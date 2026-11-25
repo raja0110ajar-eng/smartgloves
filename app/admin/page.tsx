@@ -280,6 +280,9 @@ export default function AdminPage() {
                       Simulasikan
                     </button>
                   )}
+                  <a href={`/admin/isyarat?id=${s.id}`}>
+                    <button type="button">Atur rule</button>
+                  </a>
                   <a href={`/admin/detail/${s.id}`}>
                     <button type="button">Detail</button>
                   </a>

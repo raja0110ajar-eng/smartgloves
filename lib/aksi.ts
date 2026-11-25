@@ -3,6 +3,8 @@ import { revalidatePath } from "next/cache";
 import { adminDb } from "./firebaseAdmin";
 import { bangunUlangRuleset } from "./ruleset";
 import { buatSlug } from "./slug";
+import { idKata, normBahasa, type Bahasa } from "./bahasa";
+import { normKondisi } from "./pose";
 import type { Aksi } from "./schema";
 
 export type HasilAksi = { target: string; ok: boolean; pesan: string };
@@ -23,10 +25,14 @@ export function targetAksi(a: Aksi): string {
   }
 }
 
-async function cariKembar(slug: string, kecualiId?: string) {
-  const snap = await adminDb.collection("signs").select("teks_output").limit(500).get();
+// Teks yang sama boleh ada di SIBI dan BISINDO, tapi tidak dua kali dalam satu bahasa
+async function cariKembar(bahasa: Bahasa, slug: string, kecualiId?: string) {
+  const snap = await adminDb.collection("signs").select("teks_output", "bahasa").limit(500).get();
   return snap.docs.find(
-    (d) => d.id !== kecualiId && buatSlug(String(d.data().teks_output ?? "")) === slug
+    (d) =>
+      d.id !== kecualiId &&
+      normBahasa(d.data().bahasa) === bahasa &&
+      buatSlug(String(d.data().teks_output ?? "")) === slug
   );
 }
 
@@ -37,35 +43,40 @@ export async function terapkanAksi(a: Aksi): Promise<HasilAksi> {
 
   switch (a.tipe) {
     case "kata_tambah": {
+      const bahasa: Bahasa = a.bahasa ?? "SIBI";
       const slug = buatSlug(a.teks_output);
       if (!slug) return gagal(target, "Teks harus berisi huruf atau angka.");
-      if (await cariKembar(slug)) return gagal(target, "Kata sudah ada.");
+      if (await cariKembar(bahasa, slug)) return gagal(target, `Kata sudah ada di ${bahasa}.`);
+      const id = idKata(bahasa, slug);
       try {
-        await signs.doc(slug).create({
+        await signs.doc(id).create({
           nama_isyarat: a.nama_isyarat,
           teks_output: a.teks_output,
           kategori: a.kategori ?? "kata",
+          bahasa,
           aktif: true,
           versi: 1,
           dibuat: FieldValue.serverTimestamp(),
           diubah: FieldValue.serverTimestamp(),
         });
       } catch (e) {
-        if ((e as { code?: number }).code === 6) return gagal(target, "Kata sudah ada.");
+        if ((e as { code?: number }).code === 6) return gagal(target, `Kata sudah ada di ${bahasa}.`);
         throw e;
       }
-      return sukses(target, "Kata ditambahkan.");
+      return sukses(target, `Kata ditambahkan ke ${bahasa}.`);
     }
 
     case "kata_ubah": {
       const ref = signs.doc(a.id);
       const doc = await ref.get();
       if (!doc.exists) return gagal(target, "Kata tidak ditemukan.");
+      const lama = doc.data()!;
+      const bahasa = normBahasa(lama.bahasa);
       const slug = buatSlug(a.teks_output);
       if (!slug) return gagal(target, "Teks harus berisi huruf atau angka.");
-      if (await cariKembar(slug, a.id)) return gagal(target, "Teks itu sudah dipakai kata lain.");
-
-      const lama = doc.data()!;
+      if (await cariKembar(bahasa, slug, a.id)) {
+        return gagal(target, `Teks itu sudah dipakai kata lain di ${bahasa}.`);
+      }
       const teksBerubah = lama.teks_output !== a.teks_output;
       await ref.update({
         nama_isyarat: a.nama_isyarat,
@@ -73,19 +84,12 @@ export async function terapkanAksi(a: Aksi): Promise<HasilAksi> {
         ...(teksBerubah ? { audio_url: FieldValue.delete() } : {}),
         diubah: FieldValue.serverTimestamp(),
       });
-      if (
-        teksBerubah &&
-        lama.aktif === true &&
-        Array.isArray(lama.kondisi) &&
-        lama.kondisi.length > 0
-      ) {
+      if (teksBerubah && lama.aktif === true && normKondisi(lama.kondisi).length > 0) {
         await bangunUlangRuleset();
       }
       return sukses(
         target,
-        teksBerubah
-          ? "Kata diubah. Jalankan skrip audio untuk membuat suara barunya."
-          : "Kata diubah."
+        teksBerubah ? "Kata diubah. Buat suara barunya di halaman Isyarat atau Audio." : "Kata diubah."
       );
     }
 
@@ -117,7 +121,7 @@ export async function terapkanAksi(a: Aksi): Promise<HasilAksi> {
           judul: a.judul,
           isi: a.isi,
           urutan: a.urutan ?? Number(lama.urutan ?? 0),
-          tampil: a.tampil ?? (lama.tampil === true),
+          tampil: a.tampil ?? lama.tampil === true,
           diubah: FieldValue.serverTimestamp(),
         });
         revalidatePath("/", "layout");

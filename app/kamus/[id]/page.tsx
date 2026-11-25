@@ -7,6 +7,8 @@ import { KAMUS_HANYA_SIAP } from "@/lib/kamusAturan";
 import { KATEGORI, LABEL_KATEGORI, type Kategori } from "@/lib/kategori";
 import VideoYoutube from "@/components/VideoYoutube";
 import TombolSuara from "@/components/TombolSuara";
+import { normBahasa } from "@/lib/bahasa";
+import { jenisTangan, normKondisi, LABEL_TANGAN } from "@/lib/pose";
 
 export const revalidate = 300;
 
@@ -25,6 +27,8 @@ const ambil = cache(async (id: string) => {
     const v = x.verifikasi && typeof x.verifikasi === "object" ? x.verifikasi : {};
     return {
       nama: String(x.nama_isyarat ?? ""),
+      bahasa: normBahasa(x.bahasa),
+      tangan: jenisTangan(normKondisi(x.kondisi)),
       teks: String(x.teks_output ?? ""),
       kategori: ((KATEGORI as readonly string[]).includes(kat) ? kat : "kata") as Kategori,
       arti: String(x.arti ?? ""),
@@ -66,6 +70,10 @@ export default async function DetailIsyarat({ params }: Props) {
       <article className="detail">
         <header>
           <h1 style={{ marginBottom: "0.25rem" }}>{k.nama}</h1>
+          <p style={{ margin: "0 0 0.5rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <span className="lencana">{k.bahasa}</span>
+            {k.tangan && <span className="lencana">{LABEL_TANGAN[k.tangan]}</span>}
+          </p>
           <p style={{ margin: 0, color: "var(--redup)" }}>
             Teks yang tampil dan diucapkan: <strong>{k.teks}</strong> · Kategori:{" "}
             {LABEL_KATEGORI[k.kategori]}

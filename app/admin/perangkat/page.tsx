@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAdmin } from "@/lib/useAdmin";
 import { kondisiPerangkat, teksDurasi } from "@/lib/statusBantu";
+import { persenBaterai } from "@/lib/baterai";
 
 type P = {
   id: string;
@@ -114,8 +115,8 @@ export default function PerangkatAdmin() {
                   Firmware: {p.fw || "-"} · Sinyal WiFi: {p.rssi === null ? "-" : `${p.rssi} dBm`}
                   <br />
                   Tangan kiri: {p.kiri === null ? "tidak dilaporkan" : p.kiri ? "terhubung" : "tidak terhubung"} ·
-                  Baterai kanan: {p.vk === null ? "-" : `${p.vk} mV`} · Baterai kiri:{" "}
-                  {p.vi === null ? "-" : `${p.vi} mV`} · Bahasa aktif: {p.bhs || "-"}
+                  Baterai kanan: {p.vk === null ? "-" : `${p.vk} mV (${persenBaterai(p.vk) ?? "-"}%)`} · Baterai kiri:{" "}
+                  {p.vi === null ? "-" : `${p.vi} mV (${persenBaterai(p.vi) ?? "-"}%)`} · Bahasa aktif: {p.bhs || "-"}
                 </span>
               </span>
               <button onClick={() => hapus(p)} disabled={sibuk}>

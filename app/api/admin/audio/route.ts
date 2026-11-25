@@ -47,14 +47,18 @@ export async function POST(req: Request) {
   const url = process.env.SUPABASE_URL;
   const kunci = process.env.SUPABASE_SECRET_KEY;
   if (!url || !kunci) return salah("Penyimpanan audio belum dikonfigurasi di server.", 500);
-
   const supabase = createClient(url, kunci);
   const { error } = await supabase.storage
-    .from("audio")
-    .upload(`${id}.mp3`, buf, { contentType: "audio/mpeg", upsert: true });
+    .from("Audio")
+    .upload(`${id}.mp3`, buf, {
+      contentType: "audio/mpeg",
+      cacheControl: "0",
+      upsert: true,
+    });
   if (error) return salah("Gagal mengunggah ke penyimpanan audio.", 502);
 
-  const { data } = supabase.storage.from("audio").getPublicUrl(`${id}.mp3`);
+  const { data } = supabase.storage.from("Audio").getPublicUrl(`${id}.mp3`);
+
   await ref.update({
     audio_url: `${data.publicUrl}?v=${Date.now()}`,
     audio_sumber: "unggahan",

@@ -13,6 +13,7 @@ const BATAS_IDLE_MENIT = 30;
 const MENU = [
   { href: "/admin/ringkasan", label: "Ringkasan" },
   { href: "/admin", label: "Kata" },
+  { href: "/admin/isyarat", label: "Isyarat baru" },
   { href: "/admin/rekam", label: "Rekam" },
   { href: "/admin/evaluasi", label: "Evaluasi" },
   { href: "/admin/perangkat", label: "Perangkat" },

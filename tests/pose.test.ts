@@ -186,3 +186,14 @@ describe("jenisTangan", () => {
     expect(jenisTangan([])).toBeNull();
   });
 });
+describe("hitungKondisi dengan faktor toleransi", () => {
+  it("faktor besar memperlebar rentang dan faktor kecil mempersempitnya", () => {
+    const sampel = ulang(kanan);
+    const lebar = (f: number) => {
+      const c = hitungKondisi(sampel, f).find((x) => x.sensor === "R_TELUNJUK")!;
+      return c.max - c.min;
+    };
+    expect(lebar(2)).toBeGreaterThan(lebar(1));
+    expect(lebar(0.5)).toBeLessThan(lebar(1));
+  });
+});

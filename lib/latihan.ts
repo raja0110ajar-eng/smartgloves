@@ -1,11 +1,15 @@
 import { KATEGORI, LABEL_KATEGORI, type Kategori } from "./kategori";
 import { koreksiKata, levenshtein } from "./teks";
+import type { Bahasa } from "./bahasa";
+import type { JenisTangan } from "./pose";
 
 export type Kata = {
   id: string;
   nama: string;
   teks: string;
   kategori: Kategori;
+  bahasa?: Bahasa;
+  tangan?: JenisTangan | null;
 };
 
 export type Mode = "level" | "time" | "eja";
@@ -115,9 +119,9 @@ const KUNCI = "smartgloves-latihan-v2";
 
 export const progresKosong = (): Progres => ({ level: {}, timeAttack: 0, eja: 0 });
 
-export function bacaProgres(): Progres {
+export function bacaProgres(kunci: string = KUNCI): Progres {
   try {
-    const mentah = localStorage.getItem(KUNCI);
+    const mentah = localStorage.getItem(kunci);
     if (!mentah) return progresKosong();
     const p = JSON.parse(mentah);
     return {
@@ -130,9 +134,9 @@ export function bacaProgres(): Progres {
   }
 }
 
-export function simpanProgres(p: Progres) {
+export function simpanProgres(p: Progres, kunci: string = KUNCI) {
   try {
-    localStorage.setItem(KUNCI, JSON.stringify(p));
+  localStorage.setItem(kunci, JSON.stringify(p));
   } catch {
     /* abaikan kalau penyimpanan diblokir */
   }
@@ -389,4 +393,13 @@ export function kunciLevel(level: Kata[]) {
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
   return `L${(h >>> 0).toString(36)}`;
+}
+// Progres disimpan terpisah per bahasa isyarat
+export function kunciProgres(bahasa: Bahasa) {
+  return `${KUNCI}-${bahasa.toLowerCase()}`;
+}
+
+// Data tanpa bahasa dianggap SIBI
+export function saringBahasa<T extends { bahasa?: Bahasa }>(daftar: T[], bahasa: Bahasa): T[] {
+  return daftar.filter((k) => (k.bahasa ?? "SIBI") === bahasa);
 }

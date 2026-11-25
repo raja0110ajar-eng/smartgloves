@@ -65,7 +65,7 @@ export function jenisTangan(kondisi: Kondisi[]): JenisTangan | null {
 /* ---------- Menghitung batas dari rekaman ---------- */
 // Hanya sensor yang ada di SEMUA sampel yang dihitung. Batas = rata-rata ± (2 x simpangan baku),
 // dengan margin minimal 5% dari rentang sensor.
-export function hitungKondisi(samples: Sample[]): Kondisi[] {
+export function hitungKondisi(samples: Sample[], faktor = 1): Kondisi[] {
   const hasil: Kondisi[] = [];
   if (samples.length === 0) return hasil;
 
@@ -80,7 +80,7 @@ export function hitungKondisi(samples: Sample[]): Kondisi[] {
     const [lo, hi] = SENSOR_RANGE[sensor];
     const mean = v.reduce((a, b) => a + b, 0) / v.length;
     const std = Math.sqrt(v.reduce((a, b) => a + (b - mean) ** 2, 0) / v.length);
-    const margin = Math.max(2 * std, 0.05 * (hi - lo));
+        const margin = Math.max(2 * std, 0.05 * (hi - lo)) * Math.min(3, Math.max(0.25, faktor));
     hasil.push({
       sensor,
       min: Math.round(Math.max(lo, mean - margin)),

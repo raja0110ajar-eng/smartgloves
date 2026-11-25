@@ -17,6 +17,7 @@ type Item = {
   ms: number;
   skor: number | null;
   simulasi: boolean;
+  bahasa: "SIBI" | "BISINDO";
 };
 
 type StatusState = {
@@ -25,6 +26,9 @@ type StatusState = {
   detik: number | null;
   diterima: number;
   batas: boolean;
+  kiri: boolean | null;
+  bahasa: string | null;
+  baterai: { kanan: number | null; kiri: number | null };
 };
 
 // Kata yang datang berdekatan (selisih kurang dari ini) digabung jadi satu kalimat
@@ -37,6 +41,7 @@ const PESAN_DATA: Record<string, string> = {
 };
 
 const jam = (ms: number) => new Date(ms).toLocaleTimeString("id-ID");
+const pct = (v: number | null) => (v === null ? "-" : `${v}%`);
 
 // items: terbaru lebih dulu. Hasil: kalimat terbaru lebih dulu.
 function bentukKalimat(items: Item[]) {
@@ -81,6 +86,9 @@ export default function LivePage() {
     detik: null,
     diterima: 0,
     batas: false,
+    kiri: null,
+    bahasa: null,
+    baterai: { kanan: null, kiri: null },
   });
 
   const ref = useRef<HTMLElement>(null);
@@ -156,6 +164,7 @@ export default function LivePage() {
               ms: x.waktu?.toMillis?.() ?? Date.now(),
               skor: typeof x.skor === "number" ? x.skor : null,
               simulasi: x.device_id === "simulator",
+              bahasa: x.bahasa === "BISINDO" ? ("BISINDO" as const) : ("SIBI" as const),
             };
           })
         );
@@ -184,6 +193,12 @@ export default function LivePage() {
             detik: typeof d.detikLalu === "number" ? d.detikLalu : null,
             diterima: Date.now(),
             batas: d.batasTercapai === true,
+            kiri: typeof d.kiri === "boolean" ? d.kiri : null,
+            bahasa: typeof d.bahasa === "string" ? d.bahasa : null,
+            baterai: {
+              kanan: typeof d.baterai?.kanan === "number" ? d.baterai.kanan : null,
+              kiri: typeof d.baterai?.kiri === "number" ? d.baterai.kiri : null,
+            },
           });
         }
       } catch {
@@ -299,6 +314,32 @@ export default function LivePage() {
             perangkat terhubung lagi.
           </p>
         )}
+        {status.siap && kondisi !== "belum" && (
+          <>
+            <div className="status-baris">
+              <span>
+                Tangan kiri:{" "}
+                {status.kiri === null ? "tidak dilaporkan" : status.kiri ? "terhubung" : "tidak terhubung"}
+                {" · "}Bahasa sarung tangan: <span className="lencana">{status.bahasa ?? "-"}</span>
+              </span>
+            </div>
+            {(status.baterai.kanan !== null || status.baterai.kiri !== null) && (
+              <div className="status-baris">
+                <span>
+                  Baterai: kanan {pct(status.baterai.kanan)}, kiri {pct(status.baterai.kiri)}
+                  {(status.baterai.kanan ?? 100) <= 15 || (status.baterai.kiri ?? 100) <= 15
+                    ? " (hampir habis, segera isi daya)"
+                    : ""}
+                </span>
+              </div>
+            )}
+            {status.kiri === false && (
+              <p className="status-info">
+                Isyarat dua tangan tidak akan terdeteksi sampai tangan kiri terhubung.
+              </p>
+            )}
+          </>
+        )}
         {status.gagal && (
           <p className="status-info">Status perangkat tidak dapat diperiksa saat ini.</p>
         )}
@@ -338,7 +379,9 @@ export default function LivePage() {
       <div className="live-isi" aria-live="polite" aria-atomic="true">
         {terbaru ? (
           <>
-            <p className="catatan">Hasil deteksi terakhir:</p>
+            <p className="catatan">
+              Hasil deteksi terakhir: <span className="lencana">{terbaru.bahasa}</span>
+            </p>
             <h1 className="live-teks">{terbaru.teks}</h1>
             {terbaru.skor !== null && (
               <div className="skor">
