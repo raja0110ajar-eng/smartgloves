@@ -29,6 +29,8 @@ const NAMA: Record<string, string> = {
   "POST /api/admin/evaluasi": "Simpan sesi evaluasi",
   "DELETE /api/admin/evaluasi": "Hapus sesi evaluasi",
   "POST /api/admin/tts": "Buat suara otomatis",
+  "POST /api/admin/firmware": "Unggah firmware",
+  "DELETE /api/admin/firmware": "Nonaktifkan firmware",
 };
 
 export default function LogAdmin() {

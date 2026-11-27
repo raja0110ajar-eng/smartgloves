@@ -25,6 +25,7 @@ const MENU = [
   { href: "/admin/ai/status", label: "Status AI" },
   { href: "/admin/cadangan", label: "Cadangan" },
   { href: "/admin/log", label: "Aktivitas" },
+  { href: "/admin/firmware", label: "Firmware" }
 ];
 export default function AdminBar() {
   const path = usePathname();
