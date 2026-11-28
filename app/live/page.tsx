@@ -347,6 +347,9 @@ export default function LivePage() {
             )}
           </>
         )}
+        <p className="catatan" style={{ maxWidth: "none" }}>
+          <a href="/kalibrasi">Lihat hasil kalibrasi sensor</a>
+        </p>
         {status.gagal && (
           <p className="status-info">Status perangkat tidak dapat diperiksa saat ini.</p>
         )}

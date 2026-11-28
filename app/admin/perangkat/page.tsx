@@ -267,6 +267,9 @@ export default function PerangkatAdmin() {
             <button onClick={() => kirim("rekam")} disabled={sibuk}>
               Rekam pose (hitung mundur 3 dtk)
             </button>
+            <button onClick={() => kirim("kalibrasi")} disabled={sibuk}>
+              Kalibrasi sensor
+            </button>
             <button onClick={() => kirim("sinkron")} disabled={sibuk}>
               Sinkron ruleset dan suara
             </button>
@@ -326,9 +329,10 @@ export default function PerangkatAdmin() {
       <section className="kartu" style={{ margin: "1.5rem 0" }}>
         <h2 style={{ marginTop: 0 }}>Panduan tombol di sarung tangan (master)</h2>
         <ul style={{ margin: 0, paddingLeft: "1.2rem" }}>
-          <li>1 klik: ulangi suara kata terakhir.</li>
+          <li>1 klik: kalibrasi sensor kedua tangan (klik lagi untuk membatalkan). Hasilnya ada di halaman Kalibrasi.</li>
           <li>2 klik cepat: ganti bahasa (SIBI dan BISINDO).</li>
           <li>3 klik cepat: tandai akhir kalimat (Demo Live memotong kalimat di situ).</li>
+          <li>4 klik cepat: ulangi suara kata terakhir.</li>
           <li>Tahan sekitar 1,5 detik lalu lepas: rekam pose. LED kuning berkedip menghitung mundur 3 detik, lalu merekam 3 detik.</li>
         </ul>
         <p className="catatan" style={{ maxWidth: "none", marginTop: "0.5rem" }}>

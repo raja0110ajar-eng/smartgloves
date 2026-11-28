@@ -159,6 +159,8 @@ const DIPAKAI_SISTEM = [
   "tanya",
   "privasi",
   "pengujian",
+  "kalibrasi",
+  "kesan",
 ];
 
 export const HalamanSchema = z.object({

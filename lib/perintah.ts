@@ -4,6 +4,7 @@ import { BAHASA } from "./bahasa";
 export const AKSI_PERINTAH = [
   "bahasa",
   "rekam",
+  "kalibrasi",
   "sinkron",
   "volume",
   "putar",
@@ -18,6 +19,7 @@ export type AksiPerintah = (typeof AKSI_PERINTAH)[number];
 export const LABEL_PERINTAH: Record<AksiPerintah, string> = {
   bahasa: "Ganti bahasa",
   rekam: "Rekam pose",
+  kalibrasi: "Kalibrasi sensor tekuk",
   sinkron: "Sinkron ruleset dan suara",
   volume: "Atur volume",
   putar: "Putar suara kata",
