@@ -76,7 +76,7 @@ export default async function Beranda() {
             </h1>
             <p className="hb-lead">
               SmartGloves membaca bentuk jari dan arah tangan, mencocokkannya dengan kamus isyarat
-              SIBI, lalu menampilkan dan mengucapkan hasilnya.
+              SIBI dan BISINDO, lalu menampilkan dan mengucapkan hasilnya.
             </p>
             <div className="hb-aksi">
               <Link href="/live" className="tombol utama">
@@ -173,8 +173,8 @@ export default async function Beranda() {
           <div>
             <h3>Yang dirancang bisa</h3>
             <ul>
-              <li>Membaca bentuk jari dan kemiringan satu tangan.</li>
-              <li>Mengenali isyarat SIBI yang sudah direkam di kamus.</li>
+              <li>Membaca bentuk jari dan kemiringan dua tangan memakai ESPNOW.</li>
+              <li>Mengenali isyarat SIBI dan BISINDO yang sudah direkam di kamus.</li>
               <li>Menampilkan teksnya dan mengucapkannya.</li>
               <li>Membantu belajar lewat latihan dan kamus.</li>
             </ul>
@@ -182,7 +182,6 @@ export default async function Beranda() {
           <div>
             <h3>Yang belum bisa</h3>
             <ul>
-              <li>Isyarat yang memakai dua tangan.</li>
               <li>Ekspresi wajah dan posisi tangan terhadap tubuh.</li>
               <li>Gerakan rumit yang berubah terhadap waktu.</li>
               <li>Menggantikan juru bahasa isyarat.</li>

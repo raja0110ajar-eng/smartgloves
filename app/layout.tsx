@@ -13,7 +13,7 @@ const lexend = localFont({
 });
 
 const DESKRIPSI =
-  "Sarung tangan pintar yang menerjemahkan isyarat tangan SIBI menjadi teks dan suara. Dikembangkan oleh Karsa Pandiga.";
+  "Sarung tangan pintar yang menerjemahkan isyarat tangan SIBI dan BISINDO menjadi teks dan suara. Dikembangkan oleh Karsa Pandiga.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL ?? "https://smartgloves.vercel.app"),
