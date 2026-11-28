@@ -29,13 +29,15 @@ export async function POST(req: Request) {
   }
   await hitung.set({ n: FieldValue.increment(1) }, { merge: true });
 
-  const { sign_id, teks, device_id, skor } = parsed.data;
+  const { sign_id, teks, device_id, skor, bahasa, akhir } = parsed.data;
   await adminDb.collection("events").add({
     sign_id,
     teks,
     device_id,
     waktu: FieldValue.serverTimestamp(),
     ...(skor !== undefined ? { skor: Math.round(skor) } : {}),
+    ...(bahasa ? { bahasa } : {}),
+    ...(akhir ? { akhir: true } : {}),
   });
 
   return NextResponse.json({ ok: true });

@@ -93,7 +93,7 @@ const [audio, setAudio] = useState<{ blob: Blob; url: string; detik: number } | 
       const s = (d.signs as Info[]).find((x) => x.id === target);
       if (!s) throw new Error("Isyarat tidak ditemukan.");
       setSign(s);
-      setDurasi(s.durasi_tahan_ms || 400);
+      setDurasi(s.durasi_tahan_ms || 300);
     },
     [api]
   );
@@ -200,19 +200,26 @@ const [audio, setAudio] = useState<{ blob: Blob; url: string; detik: number } | 
     }
   }
 
-  function simpanRule() {
-    return jalankan(async () => {
-      const d = await api("/api/admin/rules", "POST", {
-        sign_id: id,
-        durasi_tahan_ms: durasi,
-        kondisi: akhir,
-      });
-      setSimpanan({ versi: d.versi, bentrok: d.bentrok });
-      await muatSign(id);
-      return `Rule tersimpan untuk ${d.bahasa}. Versi ruleset: ${d.versi}. Sarung tangan akan mengunduhnya dalam sekitar satu menit.`;
-    });
+  async function rekamLewatWeb() {
+    if (tunggu || kunci.current) return;
+    try {
+      const dev = await api("/api/admin/perangkat");
+      const d = (dev.perangkat as { id: string; detikLalu: number | null }[]).find(
+        (x) => x.id !== "simulator" && x.detikLalu !== null && x.detikLalu < 150
+      );
+      if (!d) {
+        setPesan("Tidak ada sarung tangan yang online.");
+        return;
+      }
+      await api("/api/admin/perintah", "POST", { device_id: d.id, aksi: "rekam" });
+      setPesan(
+        "Perintah terkirim. Sarung tangan menghitung mundur 3 detik (LED kuning), lalu merekam 3 detik. Siapkan pose sekarang."
+      );
+      await tungguRekaman();
+    } catch (e) {
+      setPesan((e as Error).message);
+    }
   }
-
   function simpanAudioPratinjau(blob: Blob, detik: number) {
     setAudio((lama) => {
       if (lama) URL.revokeObjectURL(lama.url);
@@ -337,8 +344,11 @@ function buatSuara() {
             Tahan pose isyarat di sarung tangan, lalu ambil rekamannya.
           </p>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <button onClick={rekamLewatWeb} disabled={sibuk || tunggu}>
+              {tunggu ? "Menunggu rekaman..." : "Rekam lewat web (hitung mundur di sarung tangan)"}
+            </button>
             <button onClick={tungguRekaman} disabled={sibuk || tunggu}>
-              {tunggu ? "Menunggu rekaman..." : "Tunggu rekaman baru dari sarung tangan"}
+              Tunggu rekaman dari tombol
             </button>
             <button onClick={ambilRekaman} disabled={sibuk || tunggu}>
               Ambil rekaman terakhir
@@ -440,7 +450,7 @@ function buatSuara() {
                 <p style={{ color: "#ff8a8a", margin: 0 }}>Ada rentang yang minimumnya lebih besar dari maksimumnya.</p>
               )}
               <div>
-                <button onClick={simpanRule} disabled={sibuk || akhir.length === 0 || rentangSalah}>
+                <button onClick={rekamLewatWeb} disabled={sibuk || akhir.length === 0 || rentangSalah}>
                   Simpan rule ({akhir.length} syarat)
                 </button>
               </div>

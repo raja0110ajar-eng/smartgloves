@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/requireAdmin";
 import { RuleSchema } from "@/lib/schema";
 import { cariTumpangTindih } from "@/lib/pose";
 import { ambilRuleAktif, bangunUlangRuleset } from "@/lib/ruleset";
+import { normBahasa } from "@/lib/bahasa";
 
 export const runtime = "nodejs";
 
@@ -19,15 +20,19 @@ export async function POST(req: Request) {
   const { sign_id, durasi_tahan_ms, kondisi } = parsed.data;
 
   const ref = adminDb.collection("signs").doc(sign_id);
-  if (!(await ref.get()).exists) {
+  const doc = await ref.get();
+  if (!doc.exists) {
     return NextResponse.json({ error: "kata tidak ditemukan" }, { status: 404 });
   }
+  const bahasa = normBahasa(doc.data()?.bahasa);
 
-  const lain = (await ambilRuleAktif()).filter((r) => r.sign_id !== sign_id);
+  const lain = (await ambilRuleAktif()).filter(
+    (r) => r.sign_id !== sign_id && (r.bahasa ?? "SIBI") === bahasa
+  );
   const bentrok = cariTumpangTindih(kondisi, lain).map((r) => r.teks);
 
   await ref.update({ kondisi, durasi_tahan_ms, diubah: FieldValue.serverTimestamp() });
   const versi = await bangunUlangRuleset();
 
-  return NextResponse.json({ ok: true, versi, bentrok });
+  return NextResponse.json({ ok: true, versi, bentrok, bahasa });
 }

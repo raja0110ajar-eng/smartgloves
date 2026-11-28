@@ -10,6 +10,7 @@ export const EventSchema = z.object({
   timestamp: z.number().int().optional(),
   skor: z.number().min(0).max(100).optional(),
   bahasa: z.enum(BAHASA).optional(),
+  akhir: z.boolean().optional(), // true = penanda akhir kalimat dari tombol sarung tangan
 });
 export type EventInput = z.infer<typeof EventSchema>;
 

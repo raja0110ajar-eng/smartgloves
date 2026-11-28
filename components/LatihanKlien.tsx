@@ -84,7 +84,7 @@ export default function LatihanKlien({ kata, bahasa }: { kata: Kata[]; bahasa: B
         }
         snap
           .docChanges()
-          .filter((c) => c.type === "added")
+          .filter((c) => c.type === "added" && c.doc.data().akhir !== true)
           .map((c) => {
             const x = c.doc.data();
             return {

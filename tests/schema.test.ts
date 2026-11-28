@@ -82,3 +82,10 @@ describe("RuleSchema", () => {
     expect(RuleSchema.safeParse(rule([{ sensor: "R_ROLL", min: 5, max: 2 }])).success).toBe(false);
   });
 });
+describe("EventSchema: penanda akhir kalimat", () => {
+  it("menerima akhir=true", () => {
+    const e = { sign_id: "akhir", teks: ".", device_id: "g", akhir: true };
+    expect(EventSchema.safeParse(e).success).toBe(true);
+    expect(EventSchema.safeParse({ ...e, akhir: "ya" }).success).toBe(false);
+  });
+});

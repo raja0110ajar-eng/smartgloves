@@ -26,11 +26,14 @@ const NAMA: Record<string, string> = {
   "POST /api/admin/media": "Unggah gambar",
   "PUT /api/admin/ticker": "Ubah teks berjalan",
   "POST /api/admin/migrasi": "Migrasi data dua tangan",
-  "POST /api/admin/evaluasi": "Simpan sesi evaluasi",
+  "POST /api/admin/evaluasi": "Simpan sesi evaluasi", 
   "DELETE /api/admin/evaluasi": "Hapus sesi evaluasi",
   "POST /api/admin/tts": "Buat suara otomatis",
   "POST /api/admin/firmware": "Unggah firmware",
   "DELETE /api/admin/firmware": "Nonaktifkan firmware",
+  "POST /api/admin/perintah": "Kirim perintah ke sarung tangan",
+  "PUT /api/admin/perintah": "Aktifkan mode cepat",
+  "DELETE /api/admin/perintah": "Batalkan perintah",
 };
 
 export default function LogAdmin() {

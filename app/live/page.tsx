@@ -18,6 +18,7 @@ type Item = {
   skor: number | null;
   simulasi: boolean;
   bahasa: "SIBI" | "BISINDO";
+  akhir: boolean;
 };
 
 type StatusState = {
@@ -44,21 +45,26 @@ const jam = (ms: number) => new Date(ms).toLocaleTimeString("id-ID");
 const pct = (v: number | null) => (v === null ? "-" : `${v}%`);
 
 // items: terbaru lebih dulu. Hasil: kalimat terbaru lebih dulu.
+// Penanda "akhir kalimat" dari tombol sarung tangan memotong kalimat dengan pasti.
 function bentukKalimat(items: Item[]) {
   const urut = [...items].reverse();
   const hasil: { id: string; kata: string[]; ms: number }[] = [];
+  let tutup = true;
   for (const it of urut) {
-    const akhir = hasil[hasil.length - 1];
-    if (akhir && it.ms - akhir.ms <= JEDA_KALIMAT_MS) {
-      akhir.kata.push(it.teks);
-      akhir.ms = it.ms;
+    if (it.akhir) {
+      tutup = true;
+      continue;
+    }
+    const terakhir = hasil[hasil.length - 1];
+    if (!tutup && terakhir && it.ms - terakhir.ms <= JEDA_KALIMAT_MS) {
+      terakhir.kata.push(it.teks);
+      terakhir.ms = it.ms;
     } else {
       hasil.push({ id: it.id, kata: [it.teks], ms: it.ms });
+      tutup = false;
     }
   }
-  return hasil
-    .reverse()
-    .map((k) => ({ id: k.id, teks: k.kata.join(" "), ms: k.ms }));
+  return hasil.reverse().map((k) => ({ id: k.id, teks: k.kata.join(" "), ms: k.ms }));
 }
 
 function cariSuaraIndonesia() {
@@ -147,7 +153,7 @@ export default function LivePage() {
         } else if (suaraRef.current) {
           snap
             .docChanges()
-            .filter((c) => c.type === "added")
+            .filter((c) => c.type === "added" && c.doc.data().akhir !== true)
             .map((c) => ({
               teks: String(c.doc.data().teks ?? ""),
               ms: c.doc.data().waktu?.toMillis?.() ?? Date.now(),
@@ -164,6 +170,7 @@ export default function LivePage() {
               ms: x.waktu?.toMillis?.() ?? Date.now(),
               skor: typeof x.skor === "number" ? x.skor : null,
               simulasi: x.device_id === "simulator",
+              akhir: x.akhir === true,
               bahasa: x.bahasa === "BISINDO" ? ("BISINDO" as const) : ("SIBI" as const),
             };
           })
@@ -229,7 +236,7 @@ export default function LivePage() {
     [items, disembunyi]
   );
   const kalimat = useMemo(() => bentukKalimat(tampil), [tampil]);
-  const terbaru = tampil[0];
+  const terbaru = tampil.find((i) => !i.akhir);
 
   const detikPerangkat =
     status.detik === null
