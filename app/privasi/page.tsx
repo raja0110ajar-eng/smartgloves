@@ -48,8 +48,14 @@ export default function PrivasiPage() {
           Google dan OpenRouter (AI), serta Cloudflare (verifikasi).
         </p>
 
+        <h2>Kesan & Pesan</h2>
+        <p>
+          Kesan dan pesan yang kamu kirim lewat halaman Kesan (nama, asal, dan isi pesan) ditampilkan secara publik setelah disetujui admin. Alamat IP hanya disimpan dalam bentuk hash untuk membatasi spam, dan tidak ditampilkan. Admin dapat menyembunyikan atau menghapus pesan kapan saja.
+        </p>
+
         <h2>Kontak</h2>
-        <p>[Isi kontak tim, misalnya alamat email.]</p>
+        <p>karsapandiga@gmail.com</p>
+        <p>karsapandiga2@gmail.com</p>
       </div>
     </main>
   );

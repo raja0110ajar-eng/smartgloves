@@ -34,6 +34,7 @@ const NAMA: Record<string, string> = {
   "POST /api/admin/perintah": "Kirim perintah ke sarung tangan",
   "PUT /api/admin/perintah": "Aktifkan mode cepat",
   "DELETE /api/admin/perintah": "Batalkan perintah",
+  "POST /api/admin/kesan": "Moderasi kesan dan pesan",
 };
 
 export default function LogAdmin() {

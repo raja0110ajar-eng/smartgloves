@@ -866,3 +866,12 @@ input::placeholder, textarea::placeholder { color: var(--redup); opacity: 0.85; 
   .tb-daftar li { white-space: normal; }
   .tb-daftar[aria-hidden="true"], .tb-tombol { display: none; }
 }
+/* Kesan dan pesan */
+.kesan { display: grid; gap: 1rem; max-width: 46rem; position: relative; }
+.kesan-form { display: grid; gap: 0.6rem; }
+.kesan-form textarea { width: 100%; resize: vertical; }
+.kesan-baris { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.kesan-baris input { flex: 1; min-width: 12rem; }
+.kesan-daftar { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
+.kesan-kutip { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1.05rem; }
+.kesan-meta { color: var(--redup); font-size: 0.9rem; margin: 0.6rem 0 0; }

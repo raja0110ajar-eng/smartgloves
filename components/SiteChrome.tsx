@@ -16,6 +16,7 @@ const NAV: Item[] = [
   { href: "/latihan", label: "Latihan" },
   { href: "/kamus", label: "Kamus" },
   { href: "/tanya", label: "Tanya" },
+  { href: "/kesan", label: "Kesan" },
 ];
 
 const INFO_TETAP: Item[] = [
